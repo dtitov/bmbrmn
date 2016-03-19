@@ -29,7 +29,7 @@
                                     h: tileSize
                                 })
                                 .color('blue')
-                                .bind('KeyDown', function (e) {
+                                .bind('KeyUp', function (e) {
                                     if (e.key == Crafty.keys.LEFT_ARROW) {
                                         $.getJSON('moveLeft');
                                     } else if (e.key == Crafty.keys.RIGHT_ARROW) {
@@ -42,6 +42,14 @@
                                         $.getJSON('plantBomb');
                                     }
                                 });
+                        break;
+                    case 'Bot':
+                        Crafty.e('2D, DOM, Color').attr({
+                            x: i * tileSize,
+                            y: j * tileSize,
+                            w: tileSize,
+                            h: tileSize
+                        }).color('red');
                         break;
                     case 'Block':
                         Crafty.e('2D, DOM, Color').attr({

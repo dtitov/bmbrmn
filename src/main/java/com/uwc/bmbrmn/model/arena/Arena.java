@@ -5,7 +5,7 @@ import com.uwc.bmbrmn.model.units.Player;
 public interface Arena {
 
     int LOCK_TIMEOUT = 100;
-    double BOX_THRESHOLD = 0.66;
+    float BOX_THRESHOLD = 0.66f;
 
     void fillArena();
 
@@ -29,9 +29,9 @@ public interface Arena {
 
     default boolean isCorner(int i, int j) {
         if (i == 0) if (j == 0) return true;
-        if (i == 0) if (j == getHeight()) return true;
-        if (i == getWidth()) if (j == getHeight()) return true;
-        if (i == getWidth()) if (j == 0) return true;
+        if (i == 0) if (j == getHeight() - 1) return true;
+        if (i == getWidth() - 1) if (j == getHeight() - 1) return true;
+        if (i == getWidth() - 1) if (j == 0) return true;
         return false;
     }
 

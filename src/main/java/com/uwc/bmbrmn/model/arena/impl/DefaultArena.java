@@ -6,6 +6,7 @@ import com.uwc.bmbrmn.model.arena.Arena;
 import com.uwc.bmbrmn.model.arena.Cell;
 import com.uwc.bmbrmn.model.arena.Navigable;
 import com.uwc.bmbrmn.model.units.Bomb;
+import com.uwc.bmbrmn.model.units.Bot;
 import com.uwc.bmbrmn.model.units.Player;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
@@ -44,7 +45,7 @@ public class DefaultArena implements Arena {
                     continue;
                 }
                 if (isCorner(i, j)) {
-                    arena.put(j, i, new Player(i, j));
+                    arena.put(j, i, new Bot(i, j));
                     continue;
                 }
                 if (isBlock(i, j)) {
@@ -97,7 +98,7 @@ public class DefaultArena implements Arena {
 
         int newPositionX = item.getX() + deltaX;
         int newPositionY = item.getY() + deltaY;
-        Cell newPosition = arena.get(newPositionX, newPositionY);
+        Cell newPosition = arena.get(newPositionY, newPositionX);
         if (newPosition == null || !newPosition.isFree()) {
             return;
         }
@@ -123,7 +124,7 @@ public class DefaultArena implements Arena {
     public void plantBomb(Navigable player) {
         try {
             if (player.getLock().tryLock(LOCK_TIMEOUT, TimeUnit.MILLISECONDS)) {
-                arena.put(player.getX(), player.getY(), new Bomb(player.getX(), player.getY()));
+                arena.put(player.getY(), player.getX(), new Bomb(player.getX(), player.getY()));
             }
         } catch (InterruptedException e) {
             e.printStackTrace();

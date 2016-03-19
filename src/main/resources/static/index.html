@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>bmbrmn</title>
+</head>
+<script src="https://code.jquery.com/jquery-2.2.2.min.js"
+        integrity="sha256-36cp2Co+/62rEAAYHLmRCPIych47CvdM+uTBJwSzWjI=" crossorigin="anonymous"></script>
+<body>
+<div id="arena"></div>
+<script type="text/javascript" src="https://rawgithub.com/craftyjs/Crafty/release/dist/crafty-min.js"></script>
+<script>
+    const tileSize = 40;
+
+    function drawArena(data) {
+        var width = data.length;
+        var height = data[0].length;
+
+        for (var i = 0; i < width; i++) {
+            for (var j = 0; j < height; j++) {
+                var element = data[i][j];
+                switch (element) {
+                    case 'Player':
+                        Crafty.e('2D, DOM, Color')
+                                .attr({
+                                    x: i * tileSize,
+                                    y: j * tileSize,
+                                    w: tileSize,
+                                    h: tileSize
+                                })
+                                .color('blue')
+                                .bind('KeyDown', function (e) {
+                                    if (e.key == Crafty.keys.LEFT_ARROW) {
+                                        $.getJSON('moveLeft');
+                                    } else if (e.key == Crafty.keys.RIGHT_ARROW) {
+                                        $.getJSON('moveRight');
+                                    } else if (e.key == Crafty.keys.UP_ARROW) {
+                                        $.getJSON('moveUp');
+                                    } else if (e.key == Crafty.keys.DOWN_ARROW) {
+                                        $.getJSON('moveDown');
+                                    } else if (e.key == Crafty.keys.SPACE) {
+                                        $.getJSON('plantBomb');
+                                    }
+                                });
+                        break;
+                    case 'Block':
+                        Crafty.e('2D, DOM, Color').attr({
+                            x: i * tileSize,
+                            y: j * tileSize,
+                            w: tileSize,
+                            h: tileSize
+                        }).color('black');
+                        break;
+                    case 'Box':
+                        Crafty.e('2D, DOM, Color').attr({
+                            x: i * tileSize,
+                            y: j * tileSize,
+                            w: tileSize,
+                            h: tileSize
+                        }).color('brown');
+                        break;
+                    default:
+                        Crafty.e('2D, DOM, Color').attr({
+                            x: i * tileSize,
+                            y: j * tileSize,
+                            w: tileSize,
+                            h: tileSize
+                        }).color('yellow');
+                }
+
+            }
+        }
+    }
+    function clearArena() {
+        Crafty("2D").each(function () {
+            this.destroy();
+        });
+    }
+
+    $.getJSON('/getArena', function (data) {
+
+        var width = data.length;
+        var height = data[0].length;
+
+        Crafty.init(width * tileSize, height * tileSize, document.getElementById('arena'));
+
+        drawArena(data);
+
+        if (!!window.EventSource) {
+            var source = new EventSource('updateArena');
+            source.addEventListener('message', function (e) {
+                var data = JSON.parse(e.data);
+                clearArena();
+                drawArena(data);
+            }, false);
+
+            source.addEventListener('open', function (e) {
+                // Connection was opened.
+            }, false);
+
+            source.addEventListener('error', function (e) {
+                if (e.readyState == EventSource.CLOSED) {
+                    // Connection was closed.
+                }
+            }, false);
+        }
+    });
+</script>
+</body>
+</html>

@@ -4,6 +4,8 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.uwc.bmbrmn.model.arena.Arena;
 import com.uwc.bmbrmn.model.arena.Cell;
+import com.uwc.bmbrmn.model.arena.Navigable;
+import com.uwc.bmbrmn.model.units.Bomb;
 import com.uwc.bmbrmn.model.units.Player;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
@@ -13,6 +15,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import javax.annotation.PostConstruct;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @Scope(scopeName = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -23,21 +26,25 @@ public class DefaultArena implements Arena {
 
     private Table<Integer, Integer, Cell> arena;
 
+    private Player player;
+
     @PostConstruct
     public void init() {
         arena = HashBasedTable.create(height, width);
         fillArena();
     }
 
+    @Override
     public void fillArena() {
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
                 if (isStart(i, j)) {
-                    arena.put(j, i, new Player());
+                    player = new Player(i, j);
+                    arena.put(j, i, player);
                     continue;
                 }
                 if (isCorner(i, j)) {
-                    arena.put(j, i, new Player());
+                    arena.put(j, i, new Player(i, j));
                     continue;
                 }
                 if (isBlock(i, j)) {
@@ -53,16 +60,6 @@ public class DefaultArena implements Arena {
         }
     }
 
-    @Override
-    public String[][] toArray() {
-        String[][] cells = new String[width][height];
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height; j++) {
-                cells[i][j] = arena.get(j, i).getClass().getSimpleName();
-            }
-        }
-        return cells;
-    }
 
     @Override
     public int getWidth() {
@@ -83,4 +80,72 @@ public class DefaultArena implements Arena {
     public void setHeight(int height) {
         this.height = height;
     }
+
+    @Override
+    public Player getPlayer() {
+        return player;
+    }
+
+    @Override
+    public void moveItem(Navigable item, int deltaX, int deltaY) {
+        if (!item.isMovable()) {
+            return;
+        }
+        if (Math.abs(deltaX) > 1 || Math.abs(deltaY) > 1) {
+            return;
+        }
+
+        int newPositionX = item.getX() + deltaX;
+        int newPositionY = item.getY() + deltaY;
+        Cell newPosition = arena.get(newPositionX, newPositionY);
+        if (newPosition == null || !newPosition.isFree()) {
+            return;
+        }
+
+        try {
+            if (item.getLock().tryLock(LOCK_TIMEOUT, TimeUnit.MILLISECONDS)) {
+                if (newPosition.getLock().tryLock(LOCK_TIMEOUT, TimeUnit.MILLISECONDS)) {
+                    arena.put(newPositionY, newPositionX, item);
+                    arena.put(item.getY(), item.getX(), newPosition);
+                    item.setX(newPositionX);
+                    item.setY(newPositionY);
+                }
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            item.getLock().unlock();
+            newPosition.getLock().unlock();
+        }
+    }
+
+    @Override
+    public void plantBomb(Navigable player) {
+        try {
+            if (player.getLock().tryLock(LOCK_TIMEOUT, TimeUnit.MILLISECONDS)) {
+                arena.put(player.getX(), player.getY(), new Bomb(player.getX(), player.getY()));
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            player.getLock().unlock();
+        }
+    }
+
+    @Override
+    public void detonateBomb(Navigable item) {
+
+    }
+
+    @Override
+    public String[][] toArray() {
+        String[][] cells = new String[width][height];
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                cells[i][j] = arena.get(j, i).getClass().getSimpleName();
+            }
+        }
+        return cells;
+    }
+
 }

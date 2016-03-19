@@ -2,6 +2,8 @@ package com.uwc.bmbrmn.logic;
 
 import com.uwc.bmbrmn.controllers.GameController;
 import com.uwc.bmbrmn.model.arena.Arena;
+import com.uwc.bmbrmn.model.arena.Navigable;
+import com.uwc.bmbrmn.model.units.Player;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -18,13 +20,32 @@ public class EventProcessor {
     @Autowired
     private Arena arena;
 
-    public void processEvent(Event event) {
-        processEventInternal(event);
+    public void processEvent(Event event, Player player) {
+        processEventInternal(event, player);
         gameController.updateArena();
     }
 
-    protected void processEventInternal(Event event) {
-
+    protected void processEventInternal(Event event, Navigable item) {
+        switch (event) {
+            case MOVE_DOWN:
+                arena.moveItem(item, 0, 1);
+                break;
+            case MOVE_UP:
+                arena.moveItem(item, 0, -1);
+                break;
+            case MOVE_LEFT:
+                arena.moveItem(item, -1, 0);
+                break;
+            case MOVE_RIGHT:
+                arena.moveItem(item, 1, 0);
+                break;
+            case PLANT_BOMB:
+                arena.plantBomb(item);
+                break;
+            case DETONATE_BOMB:
+                arena.detonateBomb(item);
+                break;
+        }
     }
 
 }

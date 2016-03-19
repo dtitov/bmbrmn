@@ -1,14 +1,16 @@
 package com.uwc.bmbrmn.model.units;
 
-import com.uwc.bmbrmn.model.arena.Arena;
-import com.uwc.bmbrmn.model.arena.Cell;
+import com.uwc.bmbrmn.model.arena.Navigable;
+import com.uwc.bmbrmn.model.arena.impl.SyncronizedCell;
 
-public class Bomb implements Cell {
+public class Bomb extends SyncronizedCell implements Navigable {
 
-    private Arena arena;
+    private int x;
+    private int y;
 
-    public Bomb(Arena arena) {
-        this.arena = arena;
+    public Bomb(int x, int y) {
+        this.x = x;
+        this.y = y;
     }
 
     @Override
@@ -16,10 +18,39 @@ public class Bomb implements Cell {
         return false;
     }
 
+    @Override
+    public boolean isMovable() {
+        return false;
+    }
 
     @Override
-    public boolean isBurnable() {
+    public boolean isDetonatable() {
+        return true;
+    }
+
+    @Override
+    public boolean isExplodable() {
         return false;
+    }
+
+    @Override
+    public int getX() {
+        return x;
+    }
+
+    @Override
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    @Override
+    public int getY() {
+        return y;
+    }
+
+    @Override
+    public void setY(int y) {
+        this.y = y;
     }
 
 }

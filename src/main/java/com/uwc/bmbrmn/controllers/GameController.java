@@ -43,27 +43,27 @@ public class GameController {
 
     @RequestMapping("/moveUp")
     public void moveUp() {
-        eventProcessor.processEvent(Event.MOVE_UP);
+        eventProcessor.processEvent(Event.MOVE_UP, arena.getPlayer());
     }
 
     @RequestMapping("/moveDown")
     public void moveDown() {
-        eventProcessor.processEvent(Event.MOVE_DOWN);
+        eventProcessor.processEvent(Event.MOVE_DOWN, arena.getPlayer());
     }
 
     @RequestMapping("/moveLeft")
     public void moveLeft() {
-        eventProcessor.processEvent(Event.MOVE_LEFT);
+        eventProcessor.processEvent(Event.MOVE_LEFT, arena.getPlayer());
     }
 
     @RequestMapping("/moveRight")
     public void moveRight() {
-        eventProcessor.processEvent(Event.MOVE_RIGHT);
+        eventProcessor.processEvent(Event.MOVE_RIGHT, arena.getPlayer());
     }
 
     @RequestMapping("/plantBomb")
     public void plantBomb() {
-        eventProcessor.processEvent(Event.PLANT);
+        eventProcessor.processEvent(Event.PLANT_BOMB, arena.getPlayer());
     }
 
 }

@@ -1,8 +1,6 @@
 package com.uwc.bmbrmn.model.arena.impl;
 
-import com.uwc.bmbrmn.model.arena.Cell;
-
-public class Block implements Cell {
+public class Block extends SyncronizedCell {
 
     @Override
     public boolean isFree() {
@@ -10,7 +8,17 @@ public class Block implements Cell {
     }
 
     @Override
-    public boolean isBurnable() {
+    public boolean isMovable() {
+        return false;
+    }
+
+    @Override
+    public boolean isDetonatable() {
+        return false;
+    }
+
+    @Override
+    public boolean isExplodable() {
         return false;
     }
 

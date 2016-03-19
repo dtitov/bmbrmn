@@ -1,17 +1,24 @@
 package com.uwc.bmbrmn.model.arena.impl;
 
-import com.uwc.bmbrmn.model.arena.Cell;
-
-public class Box implements Cell {
+public class Box extends SyncronizedCell {
 
     @Override
     public boolean isFree() {
         return false;
     }
 
+    @Override
+    public boolean isMovable() {
+        return false;
+    }
 
     @Override
-    public boolean isBurnable() {
+    public boolean isDetonatable() {
+        return false;
+    }
+
+    @Override
+    public boolean isExplodable() {
         return true;
     }
 

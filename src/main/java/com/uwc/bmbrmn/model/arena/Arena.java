@@ -1,6 +1,9 @@
 package com.uwc.bmbrmn.model.arena;
 
+import com.uwc.bmbrmn.model.units.Bot;
 import com.uwc.bmbrmn.model.units.Player;
+
+import java.util.Collection;
 
 public interface Arena {
 

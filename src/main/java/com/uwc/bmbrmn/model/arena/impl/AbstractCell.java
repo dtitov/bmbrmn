@@ -3,6 +3,7 @@ package com.uwc.bmbrmn.model.arena.impl;
 import com.uwc.bmbrmn.model.arena.Cell;
 
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -12,6 +13,7 @@ public abstract class AbstractCell implements Cell {
     private boolean mined;
     private int x;
     private int y;
+    protected AtomicInteger stepsDone = new AtomicInteger(0);
 
     private Lock lock = new ReentrantLock();
 
@@ -43,18 +45,22 @@ public abstract class AbstractCell implements Cell {
     }
 
     @Override
-    public void setX(int x) {
-        this.x = x;
-    }
-
-    @Override
     public int getY() {
         return y;
     }
 
     @Override
-    public void setY(int y) {
-        this.y = y;
+    public void move(int x, int y) {
+        if (isMovable()) {
+            this.x = x;
+            this.y = y;
+            stepsDone.incrementAndGet();
+        }
+    }
+
+    @Override
+    public void resetSteps() {
+        stepsDone.set(0);
     }
 
     @Override
@@ -75,7 +81,7 @@ public abstract class AbstractCell implements Cell {
 
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return getId().hashCode();
     }
 
 }

@@ -2,12 +2,14 @@ package com.uwc.bmbrmn.model.arena.impl;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
-import com.uwc.bmbrmn.logic.bombimg.BombManager;
 import com.uwc.bmbrmn.logic.ChangesTracker;
+import com.uwc.bmbrmn.logic.bombimg.BombManager;
 import com.uwc.bmbrmn.model.arena.Arena;
 import com.uwc.bmbrmn.model.arena.Cell;
 import com.uwc.bmbrmn.model.units.Bot;
 import com.uwc.bmbrmn.model.units.Player;
+import com.uwc.bmbrmn.scheduling.ResetPlayersStepsRunnable;
+import com.uwc.bmbrmn.scheduling.TimeCounterRunnable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
@@ -41,6 +43,7 @@ public class DefaultArena implements Arena {
     private Table<Integer, Integer, Cell> arena;
 
     private Player player;
+    private Collection<Bot> bots = new HashSet<>(3);
 
     private final AtomicInteger gameSecond = new AtomicInteger(0);
 
@@ -48,6 +51,7 @@ public class DefaultArena implements Arena {
     public void init() {
         arena = HashBasedTable.create(height, width);
         fillArena();
+        initScheduledTasks();
     }
 
     @Override
@@ -60,7 +64,9 @@ public class DefaultArena implements Arena {
                     continue;
                 }
                 if (isCorner(i, j)) {
-                    arena.put(j, i, new Bot(i, j));
+                    Bot bot = new Bot(i, j);
+                    bots.add(bot);
+                    arena.put(j, i, bot);
                     continue;
                 }
                 if (isCriticalPoint(i, j)) {
@@ -78,9 +84,14 @@ public class DefaultArena implements Arena {
                 arena.put(j, i, new Space(i, j));
             }
         }
+    }
 
+    private void initScheduledTasks() {
         ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
+
         scheduledExecutorService.scheduleAtFixedRate(new TimeCounterRunnable(gameSecond), 0, 1, TimeUnit.SECONDS);
+        scheduledExecutorService.scheduleAtFixedRate(new ResetPlayersStepsRunnable(player, bots), 0, 1, TimeUnit.SECONDS);
+
     }
 
 
@@ -140,10 +151,8 @@ public class DefaultArena implements Arena {
                     arena.put(anotherCell.getY(), anotherCell.getX(), item);
                     arena.put(item.getY(), item.getX(), anotherCell);
 
-                    anotherCell.setX(item.getX());
-                    anotherCell.setY(item.getY());
-                    item.setX(newPositionX);
-                    item.setY(newPositionY);
+                    anotherCell.move(item.getX(), item.getY());
+                    item.move(newPositionX, newPositionY);
 
                     if (item.isMined()) {
                         item.setMined(false);
@@ -196,8 +205,7 @@ public class DefaultArena implements Arena {
                 arena.put(newSpace.getY(), newSpace.getX(), newSpace);
                 changesTracker.track(newSpace);
 
-                cell.setX(-1);
-                cell.setY(-1);
+                cell.move(-1, -1);
                 changesTracker.track(cell);
             });
         } catch (InterruptedException e) {

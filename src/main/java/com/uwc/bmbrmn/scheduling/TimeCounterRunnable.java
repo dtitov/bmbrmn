@@ -1,4 +1,4 @@
-package com.uwc.bmbrmn.model.arena.impl;
+package com.uwc.bmbrmn.scheduling;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

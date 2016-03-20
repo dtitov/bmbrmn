@@ -24,11 +24,11 @@ public interface Cell {
 
     int getX();
 
-    void setX(int x);
-
     int getY();
 
-    void setY( int y);
+    void move(int x, int y);
+
+    void resetSteps();
 
     @JsonIgnore
     Lock getLock();

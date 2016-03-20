@@ -13,7 +13,7 @@ public class Space extends AbstractCell {
 
     @Override
     public boolean isMovable() {
-        return false;
+        return true;
     }
 
     @Override

@@ -15,7 +15,7 @@ public class Player extends AbstractCell {
 
     @Override
     public boolean isMovable() {
-        return true;
+        return stepsDone.get() < 4;
     }
 
     @Override

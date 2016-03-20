@@ -158,6 +158,8 @@ public class DefaultArena implements Arena {
                         anotherCell.setMined(true);
                     }
 
+                    anotherCell.setFlaming(false);
+
                     changesTracker.track(item);
                     changesTracker.track(anotherCell);
                 }

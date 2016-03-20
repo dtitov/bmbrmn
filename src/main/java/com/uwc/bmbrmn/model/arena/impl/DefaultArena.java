@@ -2,6 +2,7 @@ package com.uwc.bmbrmn.model.arena.impl;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
+import com.uwc.bmbrmn.logic.bombimg.BombManager;
 import com.uwc.bmbrmn.logic.ChangesTracker;
 import com.uwc.bmbrmn.model.arena.Arena;
 import com.uwc.bmbrmn.model.arena.Cell;
@@ -15,8 +16,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.WebApplicationContext;
 
 import javax.annotation.PostConstruct;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 @Scope(scopeName = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -25,12 +32,17 @@ public class DefaultArena implements Arena {
     @Autowired
     private ChangesTracker<Cell> changesTracker;
 
+    @Autowired
+    private BombManager bombManager;
+
     private int width;
     private int height;
 
     private Table<Integer, Integer, Cell> arena;
 
     private Player player;
+
+    private final AtomicInteger gameSecond = new AtomicInteger(0);
 
     @PostConstruct
     public void init() {
@@ -66,6 +78,9 @@ public class DefaultArena implements Arena {
                 arena.put(j, i, new Space(i, j));
             }
         }
+
+        ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
+        scheduledExecutorService.scheduleAtFixedRate(new TimeCounterRunnable(gameSecond), 0, 1, TimeUnit.SECONDS);
     }
 
 
@@ -92,6 +107,11 @@ public class DefaultArena implements Arena {
     @Override
     public Player getPlayer() {
         return player;
+    }
+
+    @Override
+    public int getSecond() {
+        return gameSecond.get();
     }
 
     @Override
@@ -146,7 +166,9 @@ public class DefaultArena implements Arena {
     public void plantBomb(Cell player) {
         try {
             if (player.getLock().tryLock(LOCK_TIMEOUT, TimeUnit.MILLISECONDS)) {
-                player.setMined(true);
+                if (bombManager.tryPlant(player)) {
+                    player.setMined(true);
+                }
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -156,8 +178,35 @@ public class DefaultArena implements Arena {
     }
 
     @Override
-    public void detonateBomb(Cell item) {
+    public void detonateBomb(int x, int y) {
+        Collection<Cell> cellsToBurn = new HashSet<>();
+        for (int i = -1; i < 1; i++) {
+            cellsToBurn.add(arena.get(y, x + i));
+            cellsToBurn.add(arena.get(y + i, x));
+        }
+        cellsToBurn.removeAll(Collections.singleton((Cell) null));
+        try {
+            for (Cell cell : cellsToBurn) {
+                if (!cell.getLock().tryLock(LOCK_TIMEOUT, TimeUnit.MILLISECONDS)) {
+                    return;
+                }
+            }
+            cellsToBurn.stream().filter(Cell::isExplodable).forEach(cell -> {
+                Space newSpace = new Space(cell.getX(), cell.getY());
+                arena.put(newSpace.getY(), newSpace.getX(), newSpace);
+                changesTracker.track(newSpace);
 
+                cell.setX(-1);
+                cell.setY(-1);
+                changesTracker.track(cell);
+            });
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            for (Cell cell : cellsToBurn) {
+                cell.getLock().unlock();
+            }
+        }
     }
 
     @Override

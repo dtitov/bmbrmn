@@ -32,9 +32,6 @@ public class EventProcessor {
             case PLANT_BOMB:
                 arena.plantBomb(item);
                 break;
-            case DETONATE_BOMB:
-                arena.detonateBomb(item);
-                break;
         }
     }
 

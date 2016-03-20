@@ -98,7 +98,7 @@
                 tiles[id] = createBox(i, j);
                 break;
             default:
-                tiles[id] = mined ?  createBomb(i, j) : createSpace(i, j)
+                tiles[id] = mined ? createBomb(i, j) : createSpace(i, j)
         }
     }
 
@@ -139,8 +139,15 @@
                     var data = JSON.parse(e.data);
                     for (var i = 0; i < data.length; i++) {
                         var item = data[i];
-                        tiles[item.id].destroy();
-                        createItem(item.type, item.id, item.mined, item.x, item.y);
+                        console.log(item);
+                        if (tiles[item.id]) {
+                            tiles[item.id].destroy();
+                        } else {
+                            tiles[item.id] = item;
+                        }
+                        if (!(item.x == -1 || item.y == -1)) {
+                            createItem(item.type, item.id, item.mined, item.x, item.y);
+                        }
                     }
                 }
             }, false);

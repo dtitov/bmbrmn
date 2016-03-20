@@ -15,11 +15,13 @@ public interface Arena {
 
     Player getPlayer();
 
+    int getSecond();
+
     void moveItem(Cell item, int deltaX, int deltaY);
 
     void plantBomb(Cell item);
 
-    void detonateBomb(Cell item);
+    void detonateBomb(int x, int y);
 
     String[][] toArray();
 

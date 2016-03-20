@@ -8,7 +8,6 @@ import com.uwc.bmbrmn.logic.EventProcessor;
 import com.uwc.bmbrmn.model.arena.Arena;
 import com.uwc.bmbrmn.model.arena.Cell;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,7 +33,6 @@ public class GameController {
 
     @RequestMapping(value = "/updateStatus", produces = "text/event-stream")
     @ResponseBody
-    @Scheduled(fixedRate = 100)
     public String updateStatus() {
         ObjectMapper mapper = new ObjectMapper();
         String stringArena = null;

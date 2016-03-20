@@ -139,6 +139,7 @@
                     var data = JSON.parse(e.data);
                     for (var i = 0; i < data.length; i++) {
                         var item = data[i];
+                        console.log(item);
                         if (tiles[item.id]) {
                             tiles[item.id].destroy();
                         } else {

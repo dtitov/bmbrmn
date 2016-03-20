@@ -133,7 +133,7 @@ public class DefaultArena implements Arena {
         swapCells(item, anotherCell, newPositionX, newPositionY);
     }
 
-    private void swapCells(Cell item, Cell anotherCell, int newPositionX, int newPositionY) {
+    protected void swapCells(Cell item, Cell anotherCell, int newPositionX, int newPositionY) {
         try {
             if (item.getLock().tryLock(LOCK_TIMEOUT, TimeUnit.MILLISECONDS)) {
                 if (anotherCell.getLock().tryLock(LOCK_TIMEOUT, TimeUnit.MILLISECONDS)) {
@@ -180,7 +180,7 @@ public class DefaultArena implements Arena {
     @Override
     public void detonateBomb(int x, int y) {
         Collection<Cell> cellsToBurn = new HashSet<>();
-        for (int i = -1; i <= 1; i++) {
+        for (int i = -1; i < 1; i++) {
             cellsToBurn.add(arena.get(y, x + i));
             cellsToBurn.add(arena.get(y + i, x));
         }

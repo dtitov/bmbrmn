@@ -200,7 +200,7 @@ public class DefaultArena implements Arena {
                     return;
                 }
             }
-            cellsToBurn.stream().filter(Cell::isExplodable).forEach(cell -> {
+            cellsToBurn.stream().filter(c -> c.isExplodable() && !c.isFree()).forEach(cell -> {
                 Space newSpace = new Space(cell.getX(), cell.getY());
                 arena.put(newSpace.getY(), newSpace.getX(), newSpace);
                 changesTracker.track(newSpace);

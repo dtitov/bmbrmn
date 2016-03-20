@@ -51,11 +51,9 @@ public abstract class AbstractCell implements Cell {
 
     @Override
     public void move(int x, int y) {
-        if (isMovable()) {
-            this.x = x;
-            this.y = y;
-            stepsDone.incrementAndGet();
-        }
+        this.x = x;
+        this.y = y;
+        stepsDone.incrementAndGet();
     }
 
     @Override
@@ -84,4 +82,12 @@ public abstract class AbstractCell implements Cell {
         return getId().hashCode();
     }
 
+    @Override
+    public String toString() {
+        return getType() + "{" +
+                "id='" + id + '\'' +
+                ", x=" + x +
+                ", y=" + y +
+                '}';
+    }
 }

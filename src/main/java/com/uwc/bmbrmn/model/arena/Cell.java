@@ -22,6 +22,10 @@ public interface Cell {
 
     void setMined(boolean mined);
 
+    boolean isFlaming();
+
+    void setFlaming(boolean flaming);
+
     int getX();
 
     int getY();

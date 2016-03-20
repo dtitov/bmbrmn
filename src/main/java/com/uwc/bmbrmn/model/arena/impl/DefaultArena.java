@@ -91,7 +91,6 @@ public class DefaultArena implements Arena {
 
         scheduledExecutorService.scheduleAtFixedRate(new TimeCounterRunnable(gameSecond), 0, 1, TimeUnit.SECONDS);
         scheduledExecutorService.scheduleAtFixedRate(new ResetPlayersStepsRunnable(player, bots), 0, 1, TimeUnit.SECONDS);
-
     }
 
 
@@ -194,20 +193,29 @@ public class DefaultArena implements Arena {
             cellsToBurn.add(arena.get(y + i, x));
         }
         cellsToBurn.removeAll(Collections.singleton((Cell) null));
+        cellsToBurn.removeIf(c -> !c.isExplodable());
         try {
             for (Cell cell : cellsToBurn) {
                 if (!cell.getLock().tryLock(LOCK_TIMEOUT, TimeUnit.MILLISECONDS)) {
                     return;
                 }
             }
-            cellsToBurn.stream().filter(c -> c.isExplodable() && !c.isFree()).forEach(cell -> {
-                Space newSpace = new Space(cell.getX(), cell.getY());
+            for (Cell cell : cellsToBurn) {
+                Cell newSpace;
+                if (cell instanceof Space) {
+                    newSpace = cell;
+                    if (cell.getX() == x && cell.getY() == y) {
+                        newSpace.setMined(false);
+                    }
+                } else {
+                    newSpace = new Space(cell.getX(), cell.getY());
+                    cell.move(-1, -1);
+                    changesTracker.track(cell);
+                }
+                newSpace.setFlaming(true);
                 arena.put(newSpace.getY(), newSpace.getX(), newSpace);
                 changesTracker.track(newSpace);
-
-                cell.move(-1, -1);
-                changesTracker.track(cell);
-            });
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {

@@ -11,6 +11,7 @@ public abstract class AbstractCell implements Cell {
 
     private String id;
     private boolean mined;
+    private boolean flaming;
     private int x;
     private int y;
     protected AtomicInteger stepsDone = new AtomicInteger(0);
@@ -37,6 +38,15 @@ public abstract class AbstractCell implements Cell {
 
     public void setMined(boolean mined) {
         this.mined = mined;
+    }
+
+    @Override
+    public boolean isFlaming() {
+        return flaming;
+    }
+
+    public void setFlaming(boolean flaming) {
+        this.flaming = flaming;
     }
 
     @Override

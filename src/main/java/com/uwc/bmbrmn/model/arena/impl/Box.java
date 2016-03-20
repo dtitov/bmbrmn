@@ -1,6 +1,10 @@
 package com.uwc.bmbrmn.model.arena.impl;
 
-public class Box extends SyncronizedCell {
+public class Box extends AbstractCell {
+
+    public Box(int x, int y) {
+        super(x, y);
+    }
 
     @Override
     public boolean isFree() {
@@ -9,11 +13,6 @@ public class Box extends SyncronizedCell {
 
     @Override
     public boolean isMovable() {
-        return false;
-    }
-
-    @Override
-    public boolean isDetonatable() {
         return false;
     }
 

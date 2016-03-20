@@ -2,9 +2,11 @@ package com.uwc.bmbrmn.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.uwc.bmbrmn.logic.ChangesTracker;
 import com.uwc.bmbrmn.logic.Event;
 import com.uwc.bmbrmn.logic.EventProcessor;
 import com.uwc.bmbrmn.model.arena.Arena;
+import com.uwc.bmbrmn.model.arena.Cell;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,24 +23,27 @@ public class GameController {
     @Autowired
     private EventProcessor eventProcessor;
 
+    @Autowired
+    private ChangesTracker<Cell> changesTracker;
+
     @RequestMapping(value = "/getArena", produces = "application/json")
     @ResponseBody
     public String[][] getArena() {
         return arena.toArray();
     }
 
-    @RequestMapping(value = "/updateArena", produces = "text/event-stream")
+    @RequestMapping(value = "/updateStatus", produces = "text/event-stream")
     @ResponseBody
-    @Scheduled(initialDelay = 1000, fixedRate = 1000)
-    public String updateArena() {
+    @Scheduled(fixedRate = 100)
+    public String updateStatus() {
         ObjectMapper mapper = new ObjectMapper();
         String stringArena = null;
         try {
-            stringArena = mapper.writeValueAsString(arena.toArray());
+            stringArena = mapper.writeValueAsString(changesTracker.cutSlice());
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-        return "data: " + stringArena + "\n\n";
+        return "retry: 100\ndata: " + stringArena + "\n\n";
     }
 
     @RequestMapping("/moveUp")

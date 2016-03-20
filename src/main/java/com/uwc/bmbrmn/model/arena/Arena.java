@@ -15,11 +15,11 @@ public interface Arena {
 
     Player getPlayer();
 
-    void moveItem(Navigable item, int deltaX, int deltaY);
+    void moveItem(Cell item, int deltaX, int deltaY);
 
-    void plantBomb(Navigable item);
+    void plantBomb(Cell item);
 
-    void detonateBomb(Navigable item);
+    void detonateBomb(Cell item);
 
     String[][] toArray();
 

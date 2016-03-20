@@ -1,16 +1,11 @@
 package com.uwc.bmbrmn.model.units;
 
-import com.uwc.bmbrmn.model.arena.Navigable;
-import com.uwc.bmbrmn.model.arena.impl.SyncronizedCell;
+import com.uwc.bmbrmn.model.arena.impl.AbstractCell;
 
-public class Player extends SyncronizedCell implements Navigable {
-
-    private int x;
-    private int y;
+public class Player extends AbstractCell {
 
     public Player(int x, int y) {
-        this.x = x;
-        this.y = y;
+        super(x, y);
     }
 
     @Override
@@ -24,33 +19,8 @@ public class Player extends SyncronizedCell implements Navigable {
     }
 
     @Override
-    public boolean isDetonatable() {
-        return false;
-    }
-
-    @Override
     public boolean isExplodable() {
         return true;
-    }
-
-    @Override
-    public int getX() {
-        return x;
-    }
-
-    @Override
-    public void setX(int x) {
-        this.x = x;
-    }
-
-    @Override
-    public int getY() {
-        return y;
-    }
-
-    @Override
-    public void setY(int y) {
-        this.y = y;
     }
 
 }

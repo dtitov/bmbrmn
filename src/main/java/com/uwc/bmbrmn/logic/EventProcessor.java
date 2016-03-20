@@ -1,9 +1,7 @@
 package com.uwc.bmbrmn.logic;
 
-import com.uwc.bmbrmn.controllers.GameController;
 import com.uwc.bmbrmn.model.arena.Arena;
-import com.uwc.bmbrmn.model.arena.Navigable;
-import com.uwc.bmbrmn.model.units.Player;
+import com.uwc.bmbrmn.model.arena.Cell;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -15,17 +13,9 @@ import org.springframework.web.context.WebApplicationContext;
 public class EventProcessor {
 
     @Autowired
-    private GameController gameController;
-
-    @Autowired
     private Arena arena;
 
-    public void processEvent(Event event, Player player) {
-        processEventInternal(event, player);
-        gameController.updateArena();
-    }
-
-    protected void processEventInternal(Event event, Navigable item) {
+    public void processEvent(Event event, Cell item) {
         switch (event) {
             case MOVE_DOWN:
                 arena.moveItem(item, 0, 1);

@@ -12,73 +12,111 @@
 <script>
     const tileSize = 40;
 
+    var tiles = {};
+
+    function createPlayer(i, j) {
+        return Crafty.e('2D, DOM, Color')
+                .attr({
+                    x: i * tileSize,
+                    y: j * tileSize,
+                    w: tileSize,
+                    h: tileSize
+                })
+                .color('blue')
+                .bind('KeyUp', function (e) {
+                    if (e.key == Crafty.keys.LEFT_ARROW) {
+                        $.getJSON('moveLeft');
+                    } else if (e.key == Crafty.keys.RIGHT_ARROW) {
+                        $.getJSON('moveRight');
+                    } else if (e.key == Crafty.keys.UP_ARROW) {
+                        $.getJSON('moveUp');
+                    } else if (e.key == Crafty.keys.DOWN_ARROW) {
+                        $.getJSON('moveDown');
+                    } else if (e.key == Crafty.keys.SPACE) {
+                        $.getJSON('plantBomb');
+                    }
+                });
+    }
+
+    function createBot(i, j) {
+        return Crafty.e('2D, DOM, Color').attr({
+            x: i * tileSize,
+            y: j * tileSize,
+            w: tileSize,
+            h: tileSize
+        }).color('red');
+    }
+
+    function createBlock(i, j) {
+        return Crafty.e('2D, DOM, Color').attr({
+            x: i * tileSize,
+            y: j * tileSize,
+            w: tileSize,
+            h: tileSize
+        }).color('black');
+    }
+
+    function createBox(i, j) {
+        return Crafty.e('2D, DOM, Color').attr({
+            x: i * tileSize,
+            y: j * tileSize,
+            w: tileSize,
+            h: tileSize
+        }).color('brown');
+    }
+
+    function createSpace(i, j) {
+        return Crafty.e('2D, DOM, Color').attr({
+            x: i * tileSize,
+            y: j * tileSize,
+            w: tileSize,
+            h: tileSize
+        }).color('yellow');
+    }
+
+    function createBomb(i, j) {
+        return Crafty.e('2D, DOM, Color').attr({
+            x: i * tileSize,
+            y: j * tileSize,
+            w: tileSize,
+            h: tileSize
+        }).color('green');
+    }
+
+    function createItem(type, id, mined, i, j) {
+        switch (type) {
+            case 'Player':
+                tiles[id] = createPlayer(i, j);
+                break;
+            case 'Bot':
+                tiles[id] = createBot(i, j);
+                break;
+            case 'Block':
+                tiles[id] = createBlock(i, j);
+                break;
+            case 'Box':
+                tiles[id] = createBox(i, j);
+                break;
+            default:
+                tiles[id] = mined ?  createBomb(i, j) : createSpace(i, j)
+        }
+    }
+
     function drawArena(data) {
         var width = data.length;
         var height = data[0].length;
 
         for (var i = 0; i < width; i++) {
             for (var j = 0; j < height; j++) {
-                var element = data[i][j];
-                switch (element) {
-                    case 'Player':
-                        Crafty.e('2D, DOM, Color')
-                                .attr({
-                                    x: i * tileSize,
-                                    y: j * tileSize,
-                                    w: tileSize,
-                                    h: tileSize
-                                })
-                                .color('blue')
-                                .bind('KeyUp', function (e) {
-                                    if (e.key == Crafty.keys.LEFT_ARROW) {
-                                        $.getJSON('moveLeft');
-                                    } else if (e.key == Crafty.keys.RIGHT_ARROW) {
-                                        $.getJSON('moveRight');
-                                    } else if (e.key == Crafty.keys.UP_ARROW) {
-                                        $.getJSON('moveUp');
-                                    } else if (e.key == Crafty.keys.DOWN_ARROW) {
-                                        $.getJSON('moveDown');
-                                    } else if (e.key == Crafty.keys.SPACE) {
-                                        $.getJSON('plantBomb');
-                                    }
-                                });
-                        break;
-                    case 'Bot':
-                        Crafty.e('2D, DOM, Color').attr({
-                            x: i * tileSize,
-                            y: j * tileSize,
-                            w: tileSize,
-                            h: tileSize
-                        }).color('red');
-                        break;
-                    case 'Block':
-                        Crafty.e('2D, DOM, Color').attr({
-                            x: i * tileSize,
-                            y: j * tileSize,
-                            w: tileSize,
-                            h: tileSize
-                        }).color('black');
-                        break;
-                    case 'Box':
-                        Crafty.e('2D, DOM, Color').attr({
-                            x: i * tileSize,
-                            y: j * tileSize,
-                            w: tileSize,
-                            h: tileSize
-                        }).color('brown');
-                        break;
-                    default:
-                        Crafty.e('2D, DOM, Color').attr({
-                            x: i * tileSize,
-                            y: j * tileSize,
-                            w: tileSize,
-                            h: tileSize
-                        }).color('yellow');
-                }
+                var element = data[i][j].split(':');
+                var id = element[0];
+                var type = element[1];
+                createItem(type, id, false, i, j);
 
             }
         }
     }
+
     function clearArena() {
         Crafty("2D").each(function () {
             this.destroy();
@@ -95,11 +133,16 @@
         drawArena(data);
 
         if (!!window.EventSource) {
-            var source = new EventSource('updateArena');
+            var source = new EventSource('updateStatus');
             source.addEventListener('message', function (e) {
-                var data = JSON.parse(e.data);
-                clearArena();
-                drawArena(data);
+                if (e.data) {
+                    var data = JSON.parse(e.data);
+                    for (var i = 0; i < data.length; i++) {
+                        var item = data[i];
+                        tiles[item.id].destroy();
+                        createItem(item.type, item.id, item.mined, item.x, item.y);
+                    }
+                }
             }, false);
 
             source.addEventListener('open', function (e) {

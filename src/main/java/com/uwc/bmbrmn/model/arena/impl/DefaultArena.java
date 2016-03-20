@@ -2,12 +2,12 @@ package com.uwc.bmbrmn.model.arena.impl;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
+import com.uwc.bmbrmn.logic.ChangesTracker;
 import com.uwc.bmbrmn.model.arena.Arena;
 import com.uwc.bmbrmn.model.arena.Cell;
-import com.uwc.bmbrmn.model.arena.Navigable;
-import com.uwc.bmbrmn.model.units.Bomb;
 import com.uwc.bmbrmn.model.units.Bot;
 import com.uwc.bmbrmn.model.units.Player;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -21,6 +21,9 @@ import java.util.concurrent.TimeUnit;
 @Component
 @Scope(scopeName = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class DefaultArena implements Arena {
+
+    @Autowired
+    private ChangesTracker<Cell> changesTracker;
 
     private int width;
     private int height;
@@ -49,14 +52,14 @@ public class DefaultArena implements Arena {
                     continue;
                 }
                 if (isBlock(i, j)) {
-                    arena.put(j, i, new Block());
+                    arena.put(j, i, new Block(i, j));
                     continue;
                 }
                 if (ThreadLocalRandom.current().nextFloat() > BOX_THRESHOLD) {
-                    arena.put(j, i, new Box());
+                    arena.put(j, i, new Box(i, j));
                     continue;
                 }
-                arena.put(j, i, new Space());
+                arena.put(j, i, new Space(i, j));
             }
         }
     }
@@ -88,7 +91,7 @@ public class DefaultArena implements Arena {
     }
 
     @Override
-    public void moveItem(Navigable item, int deltaX, int deltaY) {
+    public void moveItem(Cell item, int deltaX, int deltaY) {
         if (!item.isMovable()) {
             return;
         }
@@ -98,33 +101,48 @@ public class DefaultArena implements Arena {
 
         int newPositionX = item.getX() + deltaX;
         int newPositionY = item.getY() + deltaY;
-        Cell newPosition = arena.get(newPositionY, newPositionX);
-        if (newPosition == null || !newPosition.isFree()) {
+        Cell anotherCell = arena.get(newPositionY, newPositionX);
+        if (anotherCell == null || !anotherCell.isFree()) {
             return;
         }
 
+        swapCells(item, anotherCell, newPositionX, newPositionY);
+    }
+
+    protected void swapCells(Cell item, Cell anotherCell, int newPositionX, int newPositionY) {
         try {
             if (item.getLock().tryLock(LOCK_TIMEOUT, TimeUnit.MILLISECONDS)) {
-                if (newPosition.getLock().tryLock(LOCK_TIMEOUT, TimeUnit.MILLISECONDS)) {
-                    arena.put(newPositionY, newPositionX, item);
-                    arena.put(item.getY(), item.getX(), newPosition);
+                if (anotherCell.getLock().tryLock(LOCK_TIMEOUT, TimeUnit.MILLISECONDS)) {
+                    arena.put(anotherCell.getY(), anotherCell.getX(), item);
+                    arena.put(item.getY(), item.getX(), anotherCell);
+
+                    anotherCell.setX(item.getX());
+                    anotherCell.setY(item.getY());
                     item.setX(newPositionX);
                     item.setY(newPositionY);
+
+                    if (item.isMined()) {
+                        item.setMined(false);
+                        anotherCell.setMined(true);
+                    }
+
+                    changesTracker.track(item);
+                    changesTracker.track(anotherCell);
                 }
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
             item.getLock().unlock();
-            newPosition.getLock().unlock();
+            anotherCell.getLock().unlock();
         }
     }
 
     @Override
-    public void plantBomb(Navigable player) {
+    public void plantBomb(Cell player) {
         try {
             if (player.getLock().tryLock(LOCK_TIMEOUT, TimeUnit.MILLISECONDS)) {
-                arena.put(player.getY(), player.getX(), new Bomb(player.getX(), player.getY()));
+                player.setMined(true);
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -134,7 +152,7 @@ public class DefaultArena implements Arena {
     }
 
     @Override
-    public void detonateBomb(Navigable item) {
+    public void detonateBomb(Cell item) {
 
     }
 
@@ -143,7 +161,8 @@ public class DefaultArena implements Arena {
         String[][] cells = new String[width][height];
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                cells[i][j] = arena.get(j, i).getClass().getSimpleName();
+                Cell cell = arena.get(j, i);
+                cells[i][j] = cell.getId() + ":" + cell.getClass().getSimpleName();
             }
         }
         return cells;

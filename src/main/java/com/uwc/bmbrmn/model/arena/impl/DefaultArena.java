@@ -51,6 +51,10 @@ public class DefaultArena implements Arena {
                     arena.put(j, i, new Bot(i, j));
                     continue;
                 }
+                if (isCriticalPoint(i, j)) {
+                    arena.put(j, i, new Space(i, j));
+                    continue;
+                }
                 if (isBlock(i, j)) {
                     arena.put(j, i, new Block(i, j));
                     continue;

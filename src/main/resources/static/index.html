@@ -157,8 +157,8 @@ window.location.replace('/index.html');
             }
         }
 
-        for (var i = 0; i < width; i++) {
-            for (var j = 0; j < height; j++) {
+        for (i = 0; i < width; i++) {
+            for (j = 0; j < height; j++) {
                 var element = data[i][j].split(':');
                 var id = element[0];
                 var type = element[1];
@@ -251,16 +251,6 @@ window.location.replace('/index.html');
                             createItem(item.type, item.id, item.mined, item.flaming, item.x, item.y);
                         }
                     }
-                }
-            }, false);
-
-            source.addEventListener('open', function (e) {
-                // Connection was opened.
-            }, false);
-
-            source.addEventListener('error', function (e) {
-                if (e.readyState == EventSource.CLOSED) {
-                    // Connection was closed.
                 }
             }, false);
         }

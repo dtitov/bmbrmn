@@ -1,11 +1,14 @@
-package com.uwc.bmbrmn.model.arena.impl;
+package com.uwc.bmbrmn.logic.arena.impl;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.uwc.bmbrmn.logic.ChangesTracker;
 import com.uwc.bmbrmn.logic.bombimg.BombManager;
-import com.uwc.bmbrmn.model.arena.Arena;
-import com.uwc.bmbrmn.model.arena.Cell;
+import com.uwc.bmbrmn.logic.arena.Arena;
+import com.uwc.bmbrmn.model.tiles.Cell;
+import com.uwc.bmbrmn.model.tiles.impl.Block;
+import com.uwc.bmbrmn.model.tiles.impl.Box;
+import com.uwc.bmbrmn.model.tiles.impl.Space;
 import com.uwc.bmbrmn.model.units.Bot;
 import com.uwc.bmbrmn.model.units.Player;
 import com.uwc.bmbrmn.scheduling.ResetPlayersStepsRunnable;

@@ -1,8 +1,8 @@
-package com.uwc.bmbrmn.model.arena.impl;
+package com.uwc.bmbrmn.model.tiles.impl;
 
-public class Box extends AbstractCell {
+public class Block extends AbstractCell {
 
-    public Box(int x, int y) {
+    public Block(int x, int y) {
         super(x, y);
     }
 
@@ -18,7 +18,7 @@ public class Box extends AbstractCell {
 
     @Override
     public boolean isExplodable() {
-        return true;
+        return false;
     }
 
 }

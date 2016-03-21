@@ -1,5 +1,6 @@
-package com.uwc.bmbrmn.model.arena;
+package com.uwc.bmbrmn.logic.arena;
 
+import com.uwc.bmbrmn.model.tiles.Cell;
 import com.uwc.bmbrmn.model.units.Player;
 
 public interface Arena {

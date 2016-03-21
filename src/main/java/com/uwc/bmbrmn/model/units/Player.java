@@ -1,6 +1,6 @@
 package com.uwc.bmbrmn.model.units;
 
-import com.uwc.bmbrmn.model.arena.impl.AbstractCell;
+import com.uwc.bmbrmn.model.tiles.impl.AbstractCell;
 
 public class Player extends AbstractCell {
 

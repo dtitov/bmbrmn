@@ -1,4 +1,4 @@
-package com.uwc.bmbrmn.model.arena;
+package com.uwc.bmbrmn.model.tiles;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;

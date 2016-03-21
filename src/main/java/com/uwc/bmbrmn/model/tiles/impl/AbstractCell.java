@@ -1,6 +1,6 @@
-package com.uwc.bmbrmn.model.arena.impl;
+package com.uwc.bmbrmn.model.tiles.impl;
 
-import com.uwc.bmbrmn.model.arena.Cell;
+import com.uwc.bmbrmn.model.tiles.Cell;
 
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;

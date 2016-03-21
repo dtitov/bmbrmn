@@ -1,6 +1,6 @@
 package com.uwc.bmbrmn.logic;
 
-import com.uwc.bmbrmn.model.arena.Cell;
+import com.uwc.bmbrmn.model.tiles.Cell;
 import com.uwc.bmbrmn.model.units.Player;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;

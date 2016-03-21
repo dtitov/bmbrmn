@@ -1,19 +1,19 @@
-package com.uwc.bmbrmn.model.arena.impl;
+package com.uwc.bmbrmn.model.tiles.impl;
 
-public class Space extends AbstractCell {
+public class Box extends AbstractCell {
 
-    public Space(int x, int y) {
+    public Box(int x, int y) {
         super(x, y);
     }
 
     @Override
     public boolean isFree() {
-        return !isMined();
+        return false;
     }
 
     @Override
     public boolean isMovable() {
-        return true;
+        return false;
     }
 
     @Override

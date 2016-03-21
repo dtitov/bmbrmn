@@ -8,6 +8,11 @@
         integrity="sha256-36cp2Co+/62rEAAYHLmRCPIych47CvdM+uTBJwSzWjI=" crossorigin="anonymous"></script>
 <body>
 <div id="arena"></div>
+<br><hr><br>
+<a href="#" onclick="
+$.get('/newGame');
+window.location.replace('/index.html');
+">New Game</a>
 <script type="text/javascript" src="https://rawgithub.com/craftyjs/Crafty/release/dist/crafty-min.js"></script>
 <script>
     const tileSize = 40;
@@ -132,13 +137,13 @@
                 tiles[id] = createFlame(i, j);
                 break;
             default:
-                    if (mined) {
-                        tiles[id] = createBomb(i, j);
-                    } else if (flaming) {
-                        tiles[id] = createFlame(i, j);
-                    } else {
-                        tiles[id] = createSpace(i, j);
-                    }
+                if (mined) {
+                    tiles[id] = createBomb(i, j);
+                } else if (flaming) {
+                    tiles[id] = createFlame(i, j);
+                } else {
+                    tiles[id] = createSpace(i, j);
+                }
         }
     }
 

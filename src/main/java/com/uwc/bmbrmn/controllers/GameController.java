@@ -8,9 +8,12 @@ import com.uwc.bmbrmn.logic.EventProcessor;
 import com.uwc.bmbrmn.model.arena.Arena;
 import com.uwc.bmbrmn.model.arena.Cell;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping("/")
@@ -67,6 +70,12 @@ public class GameController {
     @RequestMapping("/plantBomb")
     public void plantBomb() {
         eventProcessor.processEvent(Event.PLANT_BOMB, arena.getPlayer());
+    }
+
+    @RequestMapping("/newGame")
+    public String newGame(HttpSession session) {
+        session.invalidate();
+        return HttpStatus.OK.toString();
     }
 
 }

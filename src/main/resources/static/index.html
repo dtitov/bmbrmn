@@ -27,8 +27,8 @@ window.location.replace('/index.html');
                 ])
                 .animate("walking", -1)
                 .attr({
-                    x: i * tileSize,
-                    y: j * tileSize - tileSize,
+                    x: i * tileSize + tileSize,
+                    y: j * tileSize,
                     w: tileSize,
                     h: tileSize * 2
                 })
@@ -55,14 +55,23 @@ window.location.replace('/index.html');
                 ])
                 .animate("walking", -1)
                 .attr({
-                    x: i * tileSize,
-                    y: j * tileSize,
+                    x: i * tileSize + tileSize,
+                    y: j * tileSize + tileSize,
                     w: tileSize,
                     h: tileSize
                 });
     }
 
     function createBlock(i, j) {
+        return Crafty.e('2D, Canvas, block').attr({
+            x: i * tileSize + tileSize,
+            y: j * tileSize + tileSize,
+            w: tileSize,
+            h: tileSize
+        });
+    }
+
+    function createBorderBlock(i, j) {
         return Crafty.e('2D, Canvas, block').attr({
             x: i * tileSize,
             y: j * tileSize,
@@ -73,8 +82,8 @@ window.location.replace('/index.html');
 
     function createBox(i, j) {
         return Crafty.e('2D, Canvas, box').attr({
-            x: i * tileSize,
-            y: j * tileSize,
+            x: i * tileSize + tileSize,
+            y: j * tileSize + tileSize,
             w: tileSize,
             h: tileSize
         });
@@ -82,8 +91,8 @@ window.location.replace('/index.html');
 
     function createSpace(i, j) {
         return Crafty.e('2D, Canvas, space').attr({
-            x: i * tileSize,
-            y: j * tileSize,
+            x: i * tileSize + tileSize,
+            y: j * tileSize + tileSize,
             w: tileSize,
             h: tileSize
         });
@@ -97,8 +106,8 @@ window.location.replace('/index.html');
                 ])
                 .animate("bombing", -1)
                 .attr({
-                    x: i * tileSize,
-                    y: j * tileSize,
+                    x: i * tileSize + tileSize,
+                    y: j * tileSize + tileSize,
                     w: tileSize,
                     h: tileSize
                 });
@@ -112,8 +121,8 @@ window.location.replace('/index.html');
                 ])
                 .animate("flaming", 1)
                 .attr({
-                    x: i * tileSize,
-                    y: j * tileSize,
+                    x: i * tileSize + tileSize,
+                    y: j * tileSize + tileSize,
                     w: tileSize,
                     h: tileSize
                 });
@@ -151,9 +160,20 @@ window.location.replace('/index.html');
         var width = data.length;
         var height = data[0].length;
 
-        for (var i = 0; i < width; i++) {
-            for (var j = 0; j < height; j++) {
-                createItem('Space', -1, false, false, i, j);
+        for (var i = 0; i < width + 2; i++) {
+            for (var j = 0; j < height + 2; j++) {
+                if (i == 0 || j == 0) {
+                    createBorderBlock(i, j);
+                }
+                if (i == width + 1 || j == height + 1) {
+                    createBorderBlock(i, j);
+                }
+            }
+        }
+
+        for (i = 0; i < width; i++) {
+            for (j = 0; j < height; j++) {
+                createSpace(i, j);
             }
         }
 
@@ -178,7 +198,7 @@ window.location.replace('/index.html');
         var width = data.length;
         var height = data[0].length;
 
-        Crafty.init(width * tileSize, height * tileSize, document.getElementById('arena'));
+        Crafty.init((width + 2) * tileSize, (height + 2) * tileSize, document.getElementById('arena'));
 
         var assetsObj = {
             "sprites": {

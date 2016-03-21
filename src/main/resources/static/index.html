@@ -244,13 +244,10 @@ window.location.replace('/index.html');
                     var data = JSON.parse(e.data);
                     for (var i = 0; i < data.length; i++) {
                         var item = data[i];
-                        console.log(item);
                         if (tiles[item.id]) {
-                            console.log('destroyed');
                             tiles[item.id].destroy();
                         }
                         if (!(item.x == -1 || item.y == -1)) {
-                            console.log('got new instead');
                             createItem(item.type, item.id, item.mined, item.flaming, item.x, item.y);
                         }
                     }

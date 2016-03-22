@@ -35,7 +35,7 @@ public class BombManager {
     }
 
     public boolean tryPlant(Cell player) {
-        int bombsAllowed = 1 + arena.getSecond() / BOMB_INCREMENT_INTERVAL;
+        int bombsAllowed = 1 + arena.getTimeInSeconds() / BOMB_INCREMENT_INTERVAL;
         AtomicInteger bombsPlanted = bombMap.get(player.getId());
         if (bombsPlanted == null) {
             bombsPlanted = new AtomicInteger(0);

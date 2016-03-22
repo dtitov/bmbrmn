@@ -61,22 +61,22 @@ public class DefaultArena implements Arena {
     public void fillArena() {
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                if (isStart(i, j)) {
+                if (isStartCell(i, j)) {
                     player = new Player(i, j);
                     arena.put(j, i, player);
                     continue;
                 }
-                if (isCorner(i, j)) {
+                if (isCornerCell(i, j)) {
                     Bot bot = new Bot(i, j);
                     bots.add(bot);
                     arena.put(j, i, bot);
                     continue;
                 }
-                if (isCriticalPoint(i, j)) {
+                if (isCriticalCell(i, j)) {
                     arena.put(j, i, new Space(i, j));
                     continue;
                 }
-                if (isBlock(i, j)) {
+                if (isUnevenCell(i, j)) {
                     arena.put(j, i, new Block(i, j));
                     continue;
                 }
@@ -123,8 +123,13 @@ public class DefaultArena implements Arena {
     }
 
     @Override
-    public int getSecond() {
+    public int getTimeInSeconds() {
         return gameSecond.get();
+    }
+
+    @Override
+    public Cell getCellAt(int x, int y) {
+        return arena.get(x, y);
     }
 
     @Override

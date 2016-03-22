@@ -16,7 +16,9 @@ public interface Arena {
 
     Player getPlayer();
 
-    int getSecond();
+    int getTimeInSeconds();
+
+    Cell getCellAt(int x, int y);
 
     void moveItem(Cell item, int deltaX, int deltaY);
 
@@ -26,11 +28,11 @@ public interface Arena {
 
     String[][] toArray();
 
-    default boolean isStart(int i, int j) {
+    default boolean isStartCell(int i, int j) {
         return i == 0 && j == 0;
     }
 
-    default boolean isCorner(int i, int j) {
+    default boolean isCornerCell(int i, int j) {
         if (i == 0) if (j == 0) return true;
         if (i == 0) if (j == getHeight() - 1) return true;
         if (i == getWidth() - 1) if (j == getHeight() - 1) return true;
@@ -38,7 +40,7 @@ public interface Arena {
         return false;
     }
 
-    default boolean isCriticalPoint(int i, int j) {
+    default boolean isCriticalCell(int i, int j) {
         if (i == 1) if (j == 0) return true;
         if (i == 0) if (j == 1) return true;
         if (i == getWidth() - 1) if (j == 1) return true;
@@ -50,7 +52,7 @@ public interface Arena {
         return false;
     }
 
-    default boolean isBlock(int i, int j) {
+    default boolean isUnevenCell(int i, int j) {
         return i % 2 != 0 && j % 2 != 0;
     }
 

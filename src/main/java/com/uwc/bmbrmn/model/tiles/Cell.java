@@ -32,8 +32,6 @@ public interface Cell {
 
     void move(int x, int y);
 
-    void resetSteps();
-
     @JsonIgnore
     Lock getLock();
 

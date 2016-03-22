@@ -1,4 +1,4 @@
-package com.uwc.bmbrmn.logic.bombimg;
+package com.uwc.bmbrmn.scheduling;
 
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;

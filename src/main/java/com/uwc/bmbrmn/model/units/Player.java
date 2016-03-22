@@ -2,7 +2,12 @@ package com.uwc.bmbrmn.model.units;
 
 import com.uwc.bmbrmn.model.tiles.impl.AbstractCell;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class Player extends AbstractCell {
+
+    private AtomicInteger stepsDone = new AtomicInteger(0);
+    private boolean alive;
 
     public Player(int x, int y) {
         super(x, y);
@@ -21,6 +26,24 @@ public class Player extends AbstractCell {
     @Override
     public boolean isExplodable() {
         return true;
+    }
+
+    @Override
+    public void move(int x, int y) {
+        super.move(x, y);
+        stepsDone.incrementAndGet();
+    }
+
+    public boolean isAlive() {
+        return alive;
+    }
+
+    public void setAlive(boolean alive) {
+        this.alive = alive;
+    }
+
+    public void resetSteps() {
+        stepsDone.set(0);
     }
 
 }

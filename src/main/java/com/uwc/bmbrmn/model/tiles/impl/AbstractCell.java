@@ -14,7 +14,6 @@ public abstract class AbstractCell implements Cell {
     private boolean flaming;
     private int x;
     private int y;
-    protected AtomicInteger stepsDone = new AtomicInteger(0);
 
     private Lock lock = new ReentrantLock();
 
@@ -63,12 +62,6 @@ public abstract class AbstractCell implements Cell {
     public void move(int x, int y) {
         this.x = x;
         this.y = y;
-        stepsDone.incrementAndGet();
-    }
-
-    @Override
-    public void resetSteps() {
-        stepsDone.set(0);
     }
 
     @Override

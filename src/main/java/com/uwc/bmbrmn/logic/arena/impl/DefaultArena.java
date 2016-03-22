@@ -3,6 +3,8 @@ package com.uwc.bmbrmn.logic.arena.impl;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.uwc.bmbrmn.logic.ChangesTracker;
+import com.uwc.bmbrmn.logic.ai.AIStrategy;
+import com.uwc.bmbrmn.logic.ai.iml.BotActionRunnable;
 import com.uwc.bmbrmn.logic.bombimg.BombManager;
 import com.uwc.bmbrmn.logic.arena.Arena;
 import com.uwc.bmbrmn.model.tiles.Cell;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.WebApplicationContext;
 
 import javax.annotation.PostConstruct;
+import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -39,6 +42,9 @@ public class DefaultArena implements Arena {
 
     @Autowired
     private BombManager bombManager;
+
+    @Autowired
+    private AIStrategy aiStrategy;
 
     private int width;
     private int height;
@@ -90,10 +96,14 @@ public class DefaultArena implements Arena {
     }
 
     private void initScheduledTasks() {
-        ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
+        ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2 + bots.size());
 
-        scheduledExecutorService.scheduleAtFixedRate(new TimeCounterRunnable(gameSecond), 0, 1, TimeUnit.SECONDS);
-        scheduledExecutorService.scheduleAtFixedRate(new ResetPlayersStepsRunnable(player, bots), 0, 1, TimeUnit.SECONDS);
+        scheduledExecutorService.scheduleAtFixedRate(new TimeCounterRunnable(gameSecond), 0, BigInteger.ONE.intValue(), TimeUnit.SECONDS);
+        scheduledExecutorService.scheduleAtFixedRate(new ResetPlayersStepsRunnable(player, bots), 0, RESET_PLAYERS_STEPS_DURATION, TimeUnit.SECONDS);
+
+        for (Bot bot : bots) {
+            scheduledExecutorService.scheduleAtFixedRate(new BotActionRunnable(aiStrategy, bot), HANDICAP_DELAY, BOT_ACTION_INTERVAL, TimeUnit.MILLISECONDS);
+        }
     }
 
 

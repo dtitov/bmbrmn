@@ -5,8 +5,8 @@ import com.google.common.collect.Table;
 import com.uwc.bmbrmn.logic.ChangesTracker;
 import com.uwc.bmbrmn.logic.ai.AIStrategy;
 import com.uwc.bmbrmn.logic.ai.iml.BotActionRunnable;
-import com.uwc.bmbrmn.logic.bombimg.BombManager;
 import com.uwc.bmbrmn.logic.arena.Arena;
+import com.uwc.bmbrmn.logic.bombimg.BombManager;
 import com.uwc.bmbrmn.model.tiles.Cell;
 import com.uwc.bmbrmn.model.tiles.impl.Block;
 import com.uwc.bmbrmn.model.tiles.impl.Box;
@@ -25,7 +25,6 @@ import org.springframework.web.context.WebApplicationContext;
 import javax.annotation.PostConstruct;
 import java.math.BigInteger;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -69,28 +68,28 @@ public class DefaultArena implements Arena {
             for (int j = 0; j < height; j++) {
                 if (isStartCell(i, j)) {
                     player = new Player(i, j);
-                    arena.put(j, i, player);
+                    putCellAt(i, j, player);
                     continue;
                 }
                 if (isCornerCell(i, j)) {
                     Bot bot = new Bot(i, j);
                     bots.add(bot);
-                    arena.put(j, i, bot);
+                    putCellAt(i, j, bot);
                     continue;
                 }
                 if (isCriticalCell(i, j)) {
-                    arena.put(j, i, new Space(i, j));
+                    putCellAt(i, j, new Space(i, j));
                     continue;
                 }
                 if (isUnevenCell(i, j)) {
-                    arena.put(j, i, new Block(i, j));
+                    putCellAt(i, j, new Block(i, j));
                     continue;
                 }
                 if (ThreadLocalRandom.current().nextFloat() > BOX_THRESHOLD) {
-                    arena.put(j, i, new Box(i, j));
+                    putCellAt(i, j, new Box(i, j));
                     continue;
                 }
-                arena.put(j, i, new Space(i, j));
+                putCellAt(i, j, new Space(i, j));
             }
         }
     }
@@ -139,7 +138,11 @@ public class DefaultArena implements Arena {
 
     @Override
     public Cell getCellAt(int x, int y) {
-        return arena.get(x, y);
+        return arena.get(y, x);
+    }
+
+    private void putCellAt(int x, int y, Cell cell) {
+        arena.put(y, x, cell);
     }
 
     @Override
@@ -153,7 +156,7 @@ public class DefaultArena implements Arena {
 
         int newPositionX = item.getX() + deltaX;
         int newPositionY = item.getY() + deltaY;
-        Cell anotherCell = arena.get(newPositionY, newPositionX);
+        Cell anotherCell = getCellAt(newPositionX, newPositionY);
         if (anotherCell == null || !anotherCell.isFree()) {
             return;
         }
@@ -165,8 +168,8 @@ public class DefaultArena implements Arena {
         try {
             if (item.getLock().tryLock(LOCK_TIMEOUT, TimeUnit.MILLISECONDS)) {
                 if (anotherCell.getLock().tryLock(LOCK_TIMEOUT, TimeUnit.MILLISECONDS)) {
-                    arena.put(anotherCell.getY(), anotherCell.getX(), item);
-                    arena.put(item.getY(), item.getX(), anotherCell);
+                    putCellAt(anotherCell.getX(), anotherCell.getY(), item);
+                    putCellAt(item.getX(), item.getY(), anotherCell);
 
                     anotherCell.move(item.getX(), item.getY());
                     item.move(newPositionX, newPositionY);
@@ -207,35 +210,14 @@ public class DefaultArena implements Arena {
 
     @Override
     public void detonateBomb(int x, int y) {
-        Collection<Cell> cellsToBurn = new HashSet<>();
-        for (int i = -1; i <= 1; i++) {
-            cellsToBurn.add(arena.get(y, x + i));
-            cellsToBurn.add(arena.get(y + i, x));
-        }
-        cellsToBurn.removeAll(Collections.singleton((Cell) null));
-        cellsToBurn.removeIf(c -> !c.isExplodable());
+        Collection<Cell> cellsToBurn = getCellsToBurn(x, y);
         try {
             for (Cell cell : cellsToBurn) {
                 if (!cell.getLock().tryLock(LOCK_TIMEOUT, TimeUnit.MILLISECONDS)) {
                     return;
                 }
             }
-            for (Cell cell : cellsToBurn) {
-                Cell newSpace;
-                if (cell instanceof Space) {
-                    newSpace = cell;
-                    if (cell.getX() == x && cell.getY() == y) {
-                        newSpace.setMined(false);
-                    }
-                } else {
-                    newSpace = new Space(cell.getX(), cell.getY());
-                    cell.move(-1, -1);
-                    changesTracker.track(cell);
-                }
-                newSpace.setFlaming(true);
-                arena.put(newSpace.getY(), newSpace.getX(), newSpace);
-                changesTracker.track(newSpace);
-            }
+            cellsToBurn.forEach(this::burnCell);
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
@@ -245,12 +227,51 @@ public class DefaultArena implements Arena {
         }
     }
 
+    private Collection<Cell> getCellsToBurn(int x, int y) {
+        Collection<Cell> cellsToBurn = new HashSet<>();
+        Cell center = getCellAt(x, y);
+        center.setMined(false);
+        cellsToBurn.add(center);
+        collectCellsToBurn(cellsToBurn, center, -1, true);
+        collectCellsToBurn(cellsToBurn, center, -1, false);
+        collectCellsToBurn(cellsToBurn, center, 1, true);
+        collectCellsToBurn(cellsToBurn, center, 1, false);
+        return cellsToBurn;
+    }
+
+    private void collectCellsToBurn(Collection<Cell> cellsToBurn, Cell center, int delta, boolean horizontal) {
+        if (Math.abs(delta) > BURNING_RADIUS) {
+            return;
+        }
+        int deltaX = horizontal ? delta : 0;
+        int deltaY = !horizontal ? delta : 0;
+        Cell candidate = getCellAt(center.getX() + deltaX, center.getY() + deltaY);
+        if (candidate != null && candidate.isExplodable()) {
+            cellsToBurn.add(candidate);
+            collectCellsToBurn(cellsToBurn, center, delta + (delta / Math.abs(delta)), horizontal);
+        }
+    }
+
+    private void burnCell(Cell cell) {
+        Cell newSpace;
+        if (cell instanceof Space) {
+            newSpace = cell;
+        } else {
+            newSpace = new Space(cell.getX(), cell.getY());
+            cell.move(-1, -1);
+            changesTracker.track(cell);
+        }
+        newSpace.setFlaming(true);
+        putCellAt(newSpace.getX(), newSpace.getY(), newSpace);
+        changesTracker.track(newSpace);
+    }
+
     @Override
     public String[][] toArray() {
         String[][] cells = new String[width][height];
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                Cell cell = arena.get(j, i);
+                Cell cell = getCellAt(i, j);
                 cells[i][j] = cell.getId() + ":" + cell.getClass().getSimpleName();
             }
         }

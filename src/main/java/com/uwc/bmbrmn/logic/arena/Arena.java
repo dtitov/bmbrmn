@@ -5,8 +5,9 @@ import com.uwc.bmbrmn.model.units.Player;
 
 public interface Arena {
 
-    int LOCK_TIMEOUT = 100;
     float BOX_THRESHOLD = 0.66f;
+    int LOCK_TIMEOUT = 100;
+    int BURNING_RADIUS = 2;
     int RESET_PLAYERS_STEPS_DURATION = 1;
     int HANDICAP_DELAY = 1000;
     int BOT_ACTION_INTERVAL = 250;

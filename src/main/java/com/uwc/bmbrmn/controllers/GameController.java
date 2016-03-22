@@ -7,6 +7,8 @@ import com.uwc.bmbrmn.logic.Event;
 import com.uwc.bmbrmn.logic.EventProcessor;
 import com.uwc.bmbrmn.logic.arena.Arena;
 import com.uwc.bmbrmn.model.tiles.Cell;
+import com.uwc.bmbrmn.model.units.Bot;
+import com.uwc.bmbrmn.model.units.Player;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,10 +16,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpSession;
+import java.util.Collection;
 
 @RestController
 @RequestMapping("/")
 public class GameController {
+
+    public static final String GAME_OVER = "GAME_OVER";
 
     @Autowired
     private Arena arena;
@@ -38,13 +43,40 @@ public class GameController {
     @ResponseBody
     public String updateStatus() {
         ObjectMapper mapper = new ObjectMapper();
-        String stringArena = null;
+        String status = null;
         try {
-            stringArena = mapper.writeValueAsString(changesTracker.cutSlice());
+            Collection<Cell> slice = changesTracker.cutSlice();
+            if (isGameOver()) {
+                slice.add(new Player(0, 0) {
+                    @Override
+                    public String getId() {
+                        return GAME_OVER;
+                    }
+                });
+            }
+            status = mapper.writeValueAsString(slice);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-        return "retry: 100\ndata: " + stringArena + "\n\n";
+        return "retry: 100\ndata: " + status + "\n\n";
+    }
+
+    private boolean isGameOver() {
+        if (!arena.getPlayer().isAlive()) {
+            return true;
+        }
+
+        boolean isAllBotsDead = true;
+        for (Bot bot : arena.getBots()) {
+            if (bot.isAlive()) {
+                isAllBotsDead = false;
+                break;
+            }
+        }
+        if (isAllBotsDead) {
+            return true;
+        }
+        return false;
     }
 
     @RequestMapping("/moveUp")

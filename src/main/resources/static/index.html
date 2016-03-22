@@ -8,7 +8,9 @@
         integrity="sha256-36cp2Co+/62rEAAYHLmRCPIych47CvdM+uTBJwSzWjI=" crossorigin="anonymous"></script>
 <body>
 <div id="arena"></div>
-<br><hr><br>
+<br>
+<hr>
+<br>
 <a href="#" onclick="
 $.get('/newGame');
 window.location.replace('/index.html');
@@ -257,6 +259,8 @@ window.location.replace('/index.html');
 
         drawArena(data);
 
+        var gameOver = false;
+
         if (!!window.EventSource) {
             var source = new EventSource('updateStatus');
             source.addEventListener('message', function (e) {
@@ -264,12 +268,22 @@ window.location.replace('/index.html');
                     var data = JSON.parse(e.data);
                     for (var i = 0; i < data.length; i++) {
                         var item = data[i];
+                        if (item.id == 'GAME_OVER') {
+                            gameOver = true;
+                            continue;
+                        }
                         if (tiles[item.id]) {
                             tiles[item.id].destroy();
                         }
                         if (!(item.x == -1 || item.y == -1)) {
                             createItem(item.type, item.id, item.mined, item.flaming, item.x, item.y);
                         }
+                    }
+                    if (gameOver) {
+                        source.close();
+                        setTimeout(function () {
+                            alert("Game over :)");
+                        }, 1000);
                     }
                 }
             }, false);

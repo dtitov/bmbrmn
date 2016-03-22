@@ -1,7 +1,10 @@
 package com.uwc.bmbrmn.logic.arena;
 
 import com.uwc.bmbrmn.model.tiles.Cell;
+import com.uwc.bmbrmn.model.units.Bot;
 import com.uwc.bmbrmn.model.units.Player;
+
+import java.util.Collection;
 
 public interface Arena {
 
@@ -19,6 +22,8 @@ public interface Arena {
     int getHeight();
 
     Player getPlayer();
+
+    Collection<Bot> getBots();
 
     int getTimeInSeconds();
 

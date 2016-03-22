@@ -6,11 +6,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Player extends AbstractCell {
 
-    private AtomicInteger stepsDone = new AtomicInteger(0);
-    private boolean alive;
+    private volatile AtomicInteger stepsDone = new AtomicInteger(0);
+    private volatile boolean alive;
 
     public Player(int x, int y) {
         super(x, y);
+        alive = true;
     }
 
     @Override

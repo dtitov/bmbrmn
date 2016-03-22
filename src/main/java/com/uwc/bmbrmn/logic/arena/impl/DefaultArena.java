@@ -132,6 +132,11 @@ public class DefaultArena implements Arena {
     }
 
     @Override
+    public Collection<Bot> getBots() {
+        return bots;
+    }
+
+    @Override
     public int getTimeInSeconds() {
         return gameSecond.get();
     }
@@ -259,6 +264,9 @@ public class DefaultArena implements Arena {
         } else {
             newSpace = new Space(cell.getX(), cell.getY());
             cell.move(-1, -1);
+            if (cell instanceof Player) {
+                ((Player) cell).setAlive(false);
+            }
             changesTracker.track(cell);
         }
         newSpace.setFlaming(true);

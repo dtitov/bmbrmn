@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
@@ -43,7 +44,8 @@ public class BombManager {
         }
         if (bombsPlanted.get() < bombsAllowed) {
             BombRunnable bombRunnable = new BombRunnable(arena, this, player);
-            executorService.execute(bombRunnable);
+            Future<?> future = executorService.submit(bombRunnable);
+            bombRunnable.setFuture(future);
             bombsPlanted.incrementAndGet();
             return true;
         }

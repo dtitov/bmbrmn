@@ -9,11 +9,11 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public abstract class AbstractCell implements Cell {
 
-    private String id;
-    private boolean mined;
-    private boolean flaming;
-    private int x;
-    private int y;
+    private volatile String id;
+    private volatile boolean mined;
+    private volatile boolean flaming;
+    private volatile int x;
+    private volatile int y;
 
     private Lock lock = new ReentrantLock();
 

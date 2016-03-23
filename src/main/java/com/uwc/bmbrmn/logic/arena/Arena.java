@@ -3,8 +3,10 @@ package com.uwc.bmbrmn.logic.arena;
 import com.uwc.bmbrmn.model.tiles.Cell;
 import com.uwc.bmbrmn.model.units.Bot;
 import com.uwc.bmbrmn.model.units.Player;
+import org.xguzm.pathfinding.grid.GridCell;
 
 import java.util.Collection;
+import java.util.HashSet;
 
 public interface Arena {
 
@@ -35,7 +37,36 @@ public interface Arena {
 
     void detonateBomb(int x, int y);
 
-    String[][] toArray();
+    default Collection<Cell> getAllCells() {
+        Collection<Cell> allCells = new HashSet<>(getWidth() * getHeight());
+        for (int i = 0; i < getWidth(); i++) {
+            for (int j = 0; j < getHeight(); j++) {
+                allCells.add(getCellAt(i, j));
+            }
+        }
+        return allCells;
+    }
+
+    default String[][] toStringArray() {
+        String[][] cells = new String[getWidth()][getHeight()];
+        for (int i = 0; i < getWidth(); i++) {
+            for (int j = 0; j < getHeight(); j++) {
+                Cell cell = getCellAt(i, j);
+                cells[i][j] = cell.getId() + ":" + cell.getClass().getSimpleName();
+            }
+        }
+        return cells;
+    }
+
+    default GridCell[][] toGridCellsArray() {
+        GridCell[][] cells = new GridCell[getWidth()][getHeight()];
+        for (int i = 0; i < getWidth(); i++) {
+            for (int j = 0; j < getHeight(); j++) {
+                cells[i][j] = new GridCell(i, j, getCellAt(i, j).isFree());
+            }
+        }
+        return cells;
+    }
 
     default boolean isStartCell(int i, int j) {
         return i == 0 && j == 0;

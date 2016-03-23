@@ -233,7 +233,7 @@ public class DefaultArena implements Arena {
     }
 
     private Collection<Cell> getCellsToBurn(int x, int y) {
-        Collection<Cell> cellsToBurn = new HashSet<>();
+        Collection<Cell> cellsToBurn = new HashSet<>(9);
         Cell center = getCellAt(x, y);
         center.setMined(false);
         cellsToBurn.add(center);
@@ -272,18 +272,6 @@ public class DefaultArena implements Arena {
         newSpace.setFlaming(true);
         putCellAt(newSpace.getX(), newSpace.getY(), newSpace);
         changesTracker.track(newSpace);
-    }
-
-    @Override
-    public String[][] toArray() {
-        String[][] cells = new String[width][height];
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height; j++) {
-                Cell cell = getCellAt(i, j);
-                cells[i][j] = cell.getId() + ":" + cell.getClass().getSimpleName();
-            }
-        }
-        return cells;
     }
 
 }

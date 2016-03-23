@@ -36,7 +36,7 @@ public class GameController {
     @RequestMapping(value = "/getArena", produces = "application/json")
     @ResponseBody
     public String[][] getArena() {
-        return arena.toArray();
+        return arena.toStringArray();
     }
 
     @RequestMapping(value = "/updateStatus", produces = "text/event-stream")
@@ -62,21 +62,12 @@ public class GameController {
     }
 
     private boolean isGameOver() {
-        if (!arena.getPlayer().isAlive()) {
-            return true;
-        }
-
-        boolean isAllBotsDead = true;
         for (Bot bot : arena.getBots()) {
             if (bot.isAlive()) {
-                isAllBotsDead = false;
-                break;
+                return false;
             }
         }
-        if (isAllBotsDead) {
-            return true;
-        }
-        return false;
+        return true;
     }
 
     @RequestMapping("/moveUp")

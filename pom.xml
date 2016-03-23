@@ -41,7 +41,13 @@
             <version>3.4</version>
         </dependency>
 
-        <dependency>
+		<dependency>
+			<groupId>com.github.xaguzman</groupId>
+			<artifactId>pathfinding</artifactId>
+			<version>0.2.6</version>
+		</dependency>
+
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>

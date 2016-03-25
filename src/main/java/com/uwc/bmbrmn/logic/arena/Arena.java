@@ -50,6 +50,10 @@ public interface Arena {
         return allCells;
     }
 
+    default CompositeLock getMapLock() {
+        return getCompositeLock(getAllCells());
+    }
+
     default CompositeLock getCompositeLock(Cell... cells) {
         return getCompositeLock(Arrays.asList(cells));
     }

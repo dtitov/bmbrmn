@@ -96,14 +96,11 @@ public class DefaultArena implements Arena {
     }
 
     private void initScheduledTasks() {
-        ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2 + bots.size());
+        ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(3);
 
         scheduledExecutorService.scheduleAtFixedRate(new TimeCounterRunnable(gameSecond), 0, BigInteger.ONE.intValue(), TimeUnit.SECONDS);
         scheduledExecutorService.scheduleAtFixedRate(new ResetPlayersStepsRunnable(player, bots), 0, RESET_PLAYERS_STEPS_DURATION, TimeUnit.SECONDS);
-
-        for (Bot bot : bots) {
-            scheduledExecutorService.scheduleAtFixedRate(new BotActionRunnable(aiStrategy, bot), HANDICAP_DELAY, BOT_ACTION_INTERVAL, TimeUnit.MILLISECONDS);
-        }
+        scheduledExecutorService.scheduleAtFixedRate(new BotActionRunnable(aiStrategy, bots), HANDICAP_DELAY, BOT_ACTION_INTERVAL, TimeUnit.MILLISECONDS);
     }
 
 

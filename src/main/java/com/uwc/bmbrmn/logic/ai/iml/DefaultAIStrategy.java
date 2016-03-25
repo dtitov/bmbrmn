@@ -1,5 +1,6 @@
 package com.uwc.bmbrmn.logic.ai.iml;
 
+import com.googlecode.concurentlocks.CompositeLock;
 import com.uwc.bmbrmn.logic.Event;
 import com.uwc.bmbrmn.logic.EventProcessor;
 import com.uwc.bmbrmn.logic.ai.AIStrategy;
@@ -25,7 +26,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static com.uwc.bmbrmn.logic.arena.Arena.LOCK_TIMEOUT;
 
 @Service
 @Scope(scopeName = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -52,7 +56,16 @@ public class DefaultAIStrategy implements AIStrategy {
 
     @Override
     public void performAction(Bot bot) {
-        performActionInternally(bot);
+        CompositeLock mapLock = arena.getMapLock();
+        try {
+            if (mapLock.tryLock(LOCK_TIMEOUT, TimeUnit.MILLISECONDS)) {
+                performActionInternally(bot);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            mapLock.unlock();
+        }
     }
 
     private void performActionInternally(Bot bot) {

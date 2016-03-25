@@ -1,12 +1,15 @@
 package com.uwc.bmbrmn.logic.arena;
 
+import com.googlecode.concurentlocks.CompositeLock;
 import com.uwc.bmbrmn.model.tiles.Cell;
 import com.uwc.bmbrmn.model.units.Bot;
 import com.uwc.bmbrmn.model.units.Player;
 import org.xguzm.pathfinding.grid.GridCell;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.concurrent.locks.Lock;
 
 public interface Arena {
 
@@ -45,6 +48,15 @@ public interface Arena {
             }
         }
         return allCells;
+    }
+
+    default CompositeLock getCompositeLock(Cell... cells) {
+        return getCompositeLock(Arrays.asList(cells));
+    }
+
+    default CompositeLock getCompositeLock(Collection<Cell> cells) {
+        Lock[] locks = cells.stream().map(Cell::getLock).toArray(Lock[]::new);
+        return new CompositeLock(locks);
     }
 
     default String[][] toStringArray() {

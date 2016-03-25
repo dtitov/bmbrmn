@@ -2,6 +2,7 @@ package com.uwc.bmbrmn.logic.arena.impl;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
+import com.googlecode.concurentlocks.CompositeLock;
 import com.uwc.bmbrmn.logic.ChangesTracker;
 import com.uwc.bmbrmn.logic.ai.AIStrategy;
 import com.uwc.bmbrmn.logic.ai.iml.BotActionRunnable;
@@ -170,31 +171,29 @@ public class DefaultArena implements Arena {
     }
 
     private void swapCells(Cell item, Cell anotherCell, int newPositionX, int newPositionY) {
+        CompositeLock compositeLock = getCompositeLock(item, anotherCell);
         try {
-            if (item.getLock().tryLock(LOCK_TIMEOUT, TimeUnit.MILLISECONDS)) {
-                if (anotherCell.getLock().tryLock(LOCK_TIMEOUT, TimeUnit.MILLISECONDS)) {
-                    putCellAt(anotherCell.getX(), anotherCell.getY(), item);
-                    putCellAt(item.getX(), item.getY(), anotherCell);
+            if (compositeLock.tryLock(LOCK_TIMEOUT, TimeUnit.MILLISECONDS)) {
+                putCellAt(anotherCell.getX(), anotherCell.getY(), item);
+                putCellAt(item.getX(), item.getY(), anotherCell);
 
-                    anotherCell.move(item.getX(), item.getY());
-                    item.move(newPositionX, newPositionY);
+                anotherCell.move(item.getX(), item.getY());
+                item.move(newPositionX, newPositionY);
 
-                    if (item.isMined()) {
-                        item.setMined(false);
-                        anotherCell.setMined(true);
-                    }
-
-                    anotherCell.setFlaming(false);
-
-                    changesTracker.track(item);
-                    changesTracker.track(anotherCell);
+                if (item.isMined()) {
+                    item.setMined(false);
+                    anotherCell.setMined(true);
                 }
+
+                anotherCell.setFlaming(false);
+
+                changesTracker.track(item);
+                changesTracker.track(anotherCell);
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
-            item.getLock().unlock();
-            anotherCell.getLock().unlock();
+            compositeLock.unlock();
         }
     }
 
@@ -216,19 +215,15 @@ public class DefaultArena implements Arena {
     @Override
     public void detonateBomb(int x, int y) {
         Collection<Cell> cellsToBurn = getCellsToBurn(x, y);
+        CompositeLock compositeLock = getCompositeLock(cellsToBurn);
         try {
-            for (Cell cell : cellsToBurn) {
-                if (!cell.getLock().tryLock(LOCK_TIMEOUT, TimeUnit.MILLISECONDS)) {
-                    return;
-                }
+            if (compositeLock.tryLock(LOCK_TIMEOUT, TimeUnit.MILLISECONDS)) {
+                cellsToBurn.forEach(this::burnCell);
             }
-            cellsToBurn.forEach(this::burnCell);
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
-            for (Cell cell : cellsToBurn) {
-                cell.getLock().unlock();
-            }
+            compositeLock.unlock();
         }
     }
 

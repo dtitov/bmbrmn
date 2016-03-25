@@ -41,7 +41,13 @@
             <version>3.4</version>
         </dependency>
 
-		<dependency>
+        <dependency>
+            <groupId>com.googlecode.concurrent-locks</groupId>
+            <artifactId>concurrent-locks</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
+        <dependency>
 			<groupId>com.github.xaguzman</groupId>
 			<artifactId>pathfinding</artifactId>
 			<version>0.2.6</version>

@@ -52,6 +52,10 @@ public class DefaultAIStrategy implements AIStrategy {
 
     @Override
     public void performAction(Bot bot) {
+        performActionInternally(bot);
+    }
+
+    private void performActionInternally(Bot bot) {
         if (CollectionUtils.isEmpty(getPossibleDirections(bot))) {
             return;
         }

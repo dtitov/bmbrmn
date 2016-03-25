@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpSession;
+import java.math.BigInteger;
 import java.util.Collection;
 
 @RestController
@@ -62,12 +63,13 @@ public class GameController {
     }
 
     private boolean isGameOver() {
+        int aliveUnits = arena.getPlayer().isAlive() ? 1 : 0;
         for (Bot bot : arena.getBots()) {
             if (bot.isAlive()) {
-                return false;
+                aliveUnits++;
             }
         }
-        return true;
+        return aliveUnits == BigInteger.ONE.intValue();
     }
 
     @RequestMapping("/moveUp")

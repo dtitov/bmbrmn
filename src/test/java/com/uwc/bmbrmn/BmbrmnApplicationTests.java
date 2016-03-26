@@ -30,10 +30,10 @@ public class BmbrmnApplicationTests {
 
     private MockMvc mockMvc;
 
-    @Value("${arena.width:13}")
+    @Value("${arena.width}")
     private int width;
 
-    @Value("${arena.height:11}")
+    @Value("${arena.height}")
     private int height;
 
     @Before

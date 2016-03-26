@@ -83,6 +83,14 @@ public class DefaultAIStrategy implements AIStrategy {
     }
 
     /**
+     * AI strategy:
+     * - If there's no way to go - do nothing
+     * - If Bot is in danger - try to take him to safe place
+     * - If Bot is not in danger - place bomb
+     * <p>
+     * TODO: There should be check if planting bomb gonna kill the bot
+     * TODO: If so, the bomb shouldn't be planted and the bot should go to some other cell
+     *
      * @param bot Bot
      */
     private void performActionInternally(Bot bot) {

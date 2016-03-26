@@ -173,8 +173,8 @@ public class DefaultAIStrategy implements AIStrategy {
     private Collection<Event> getPossibleDirections(Bot bot) {
         Collection<Event> possibleDirections = new HashSet<>(4);
 
-        Cell up = arena.getCellAt(bot.getX(), bot.getY() + 1);
-        Cell down = arena.getCellAt(bot.getX(), bot.getY() - 1);
+        Cell down = arena.getCellAt(bot.getX(), bot.getY() + 1);
+        Cell up = arena.getCellAt(bot.getX(), bot.getY() - 1);
         Cell left = arena.getCellAt(bot.getX() - 1, bot.getY());
         Cell right = arena.getCellAt(bot.getX() + 1, bot.getY());
 

@@ -148,12 +148,12 @@ public class DefaultAIStrategy implements AIStrategy {
     }
 
     private Pair<Integer, Integer> findSafePlace(Bot bot) {
-        for (int i = -6; i < 6; i++) {
-            for (int j = -5; j < 5; j++) {
+        for (int i = -arena.getWidth() / 2; i < arena.getWidth() / 2; i++) {
+            for (int j = -arena.getHeight() / 2; j < arena.getHeight() / 2; j++) {
                 Cell cell = arena.getCellAt(bot.getX() + i, bot.getY() + j);
                 if (cell != null) {
                     Pair<Integer, Integer> pairCell = cell.toPair();
-                    if (cell.isFree() && isSafe(pairCell) && isReacheable(bot, pairCell)) {
+                    if (cell.isFree() && isSafe(pairCell) && isReachable(bot, pairCell)) {
                         return pairCell;
                     }
                 }
@@ -162,7 +162,7 @@ public class DefaultAIStrategy implements AIStrategy {
         return null;
     }
 
-    private boolean isReacheable(Bot bot, Pair<Integer, Integer> target) {
+    private boolean isReachable(Bot bot, Pair<Integer, Integer> target) {
         Collection<ImmutablePair<Integer, Integer>> path = findPath(bot.toPair(), target);
         return !CollectionUtils.isEmpty(path);
     }

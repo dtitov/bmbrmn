@@ -261,7 +261,7 @@ $.getJSON('/getArena', function (data) {
                     setTimeout(function () {
                         var r = confirm("Game over :) Restart?");
                         if (r == true) {
-                            window.location.replace('/index.html');
+                            window.location.replace('/');
                         }
                     }, 1000);
                 }

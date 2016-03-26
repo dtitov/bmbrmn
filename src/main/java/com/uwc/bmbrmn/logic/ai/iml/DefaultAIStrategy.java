@@ -128,7 +128,7 @@ public class DefaultAIStrategy implements AIStrategy {
         Cell left = arena.getCellAt(bot.getX() - 1, bot.getY());
         Cell right = arena.getCellAt(bot.getX() + 1, bot.getY());
 
-        if (up != null && up.isFree() && isSafe(up.toPair())) {
+        if (up != null && up.isFree()) {
             possibleDirections.add(Event.MOVE_UP);
         }
         if (down != null && down.isFree()) {
@@ -152,13 +152,17 @@ public class DefaultAIStrategy implements AIStrategy {
     }
 
     private Pair<Integer, Integer> findSafePlace(Bot bot) {
-        for (int i = -arena.getWidth() / 2; i < arena.getWidth() / 2; i++) {
-            for (int j = -arena.getHeight() / 2; j < arena.getHeight() / 2; j++) {
-                Cell cell = arena.getCellAt(bot.getX() + i, bot.getY() + j);
-                if (cell != null) {
-                    Pair<Integer, Integer> pairCell = cell.toPair();
-                    if (cell.isFree() && isSafe(pairCell) && isReachable(bot, pairCell)) {
-                        return pairCell;
+        for (int radius = 1; radius < Math.min(arena.getWidth(), arena.getHeight()) / 2; radius++) {
+            for (int i = -radius; i <= radius; i++) {
+                for (int j = -radius; j <= radius; j++) {
+                    if (Math.abs(i) == radius || Math.abs(j) == radius) {
+                        Cell cell = arena.getCellAt(bot.getX() + i, bot.getY() + j);
+                        if (cell != null) {
+                            Pair<Integer, Integer> pairCell = cell.toPair();
+                            if (cell.isFree() && isSafe(pairCell) && isReachable(bot, pairCell)) {
+                                return pairCell;
+                            }
+                        }
                     }
                 }
             }

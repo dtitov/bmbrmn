@@ -14,7 +14,7 @@ import java.util.concurrent.locks.Lock;
 public interface Arena {
 
     float BOX_THRESHOLD = 0.66f;
-    int LOCK_TIMEOUT = 100;
+    int LOCK_TIMEOUT = 200;
     int BURNING_RADIUS = 2;
     int RESET_PLAYERS_STEPS_DURATION = 1;
     int HANDICAP_DELAY = 1000;

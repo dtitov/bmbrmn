@@ -21,6 +21,9 @@ import javax.servlet.http.HttpSession;
 import java.math.BigInteger;
 import java.util.Collection;
 
+/**
+ * Entry point for game exposing REST endpoints
+ */
 @RestController
 @RequestMapping("/")
 public class GameController {
@@ -36,7 +39,7 @@ public class GameController {
     private EventProcessor eventProcessor;
 
     @Autowired
-    private ChangesTracker<Cell> changesTracker;
+    private ChangesTracker changesTracker;
 
     @RequestMapping(value = "/getArena", produces = "application/json")
     @ResponseBody
@@ -63,7 +66,7 @@ public class GameController {
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);
         }
-        return "retry: 100\ndata: " + status + "\n\n";
+        return "retry: 200\ndata: " + status + "\n\n";
     }
 
     private boolean isGameOver() {

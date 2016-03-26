@@ -35,6 +35,9 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Default implementation of Arena interface
+ */
 @Component
 @Scope(scopeName = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class DefaultArena implements Arena {
@@ -42,7 +45,7 @@ public class DefaultArena implements Arena {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultArena.class);
 
     @Autowired
-    private ChangesTracker<Cell> changesTracker;
+    private ChangesTracker changesTracker;
 
     @Autowired
     private BombManager bombManager;
@@ -50,7 +53,10 @@ public class DefaultArena implements Arena {
     @Autowired
     private AIStrategy aiStrategy;
 
+    @Value("${arena.width:13}")
     private int width;
+
+    @Value("${arena.height:11}")
     private int height;
 
     private Table<Integer, Integer, Cell> arena;
@@ -60,6 +66,9 @@ public class DefaultArena implements Arena {
 
     private final AtomicInteger gameSecond = new AtomicInteger(0);
 
+    /**
+     * Init arena
+     */
     @PostConstruct
     public void init() {
         arena = HashBasedTable.create(height, width);
@@ -67,7 +76,9 @@ public class DefaultArena implements Arena {
         initScheduledTasks();
     }
 
-    @Override
+    /**
+     * Init arena with cells
+     */
     public void fillArena() {
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
@@ -99,6 +110,9 @@ public class DefaultArena implements Arena {
         }
     }
 
+    /**
+     * Init scheduled tasks (e.g. TimeCounterRunnable, ResetPlayersStepsRunnable, BotActionRunnable)
+     */
     private void initScheduledTasks() {
         ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(3);
 
@@ -107,51 +121,64 @@ public class DefaultArena implements Arena {
         scheduledExecutorService.scheduleAtFixedRate(new BotActionRunnable(aiStrategy, bots), HANDICAP_DELAY, BOT_ACTION_INTERVAL, TimeUnit.MILLISECONDS);
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int getWidth() {
         return width;
     }
 
-    @Value("${arena.width:13}")
-    public void setWidth(int width) {
-        this.width = width;
-    }
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int getHeight() {
         return height;
     }
 
-    @Value("${arena.height:11}")
-    public void setHeight(int height) {
-        this.height = height;
-    }
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Player getPlayer() {
         return player;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Collection<Bot> getBots() {
         return bots;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int getTimeInSeconds() {
         return gameSecond.get();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Cell getCellAt(int x, int y) {
         return arena.get(y, x);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     private void putCellAt(int x, int y, Cell cell) {
         arena.put(y, x, cell);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void moveItem(Cell item, int deltaX, int deltaY) {
         if (!item.isMovable()) {
@@ -171,6 +198,14 @@ public class DefaultArena implements Arena {
         swapCells(item, anotherCell, newPositionX, newPositionY);
     }
 
+    /**
+     * Swap to cells
+     *
+     * @param item         First cell to swap
+     * @param anotherCell  Second cell to swap
+     * @param newPositionX x coordinate of second cell to swap
+     * @param newPositionY y coordinate of second cell to swap
+     */
     private void swapCells(Cell item, Cell anotherCell, int newPositionX, int newPositionY) {
         CompositeLock compositeLock = getCompositeLock(item, anotherCell);
         try {
@@ -198,6 +233,9 @@ public class DefaultArena implements Arena {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void plantBomb(Cell player) {
         try {
@@ -213,6 +251,9 @@ public class DefaultArena implements Arena {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void detonateBomb(int x, int y) {
         Collection<Cell> cellsToBurn = getCellsToBurn(x, y);
@@ -228,6 +269,13 @@ public class DefaultArena implements Arena {
         }
     }
 
+    /**
+     * Get cells which are going to burn if bomb detonated at specified location
+     *
+     * @param x x coordinate of bomb
+     * @param y y coordinate of bomb
+     * @return Cells going to burn
+     */
     private Collection<Cell> getCellsToBurn(int x, int y) {
         Collection<Cell> cellsToBurn = new HashSet<>(9);
         Cell center = getCellAt(x, y);
@@ -240,6 +288,14 @@ public class DefaultArena implements Arena {
         return cellsToBurn;
     }
 
+    /**
+     * Recursive method for filling collection of cells to burn
+     *
+     * @param cellsToBurn Collection of cells to burn
+     * @param center      Mined cell
+     * @param delta       Scan length
+     * @param horizontal  Scan direction
+     */
     private void collectCellsToBurn(Collection<Cell> cellsToBurn, Cell center, int delta, boolean horizontal) {
         if (Math.abs(delta) > BURNING_RADIUS) {
             return;
@@ -253,6 +309,11 @@ public class DefaultArena implements Arena {
         }
     }
 
+    /**
+     * Burns specified cell
+     *
+     * @param cell Cell to burn
+     */
     private void burnCell(Cell cell) {
         Cell newSpace;
         if (cell instanceof Space) {

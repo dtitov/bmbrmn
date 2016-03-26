@@ -3,12 +3,15 @@ package com.uwc.bmbrmn.scheduling;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
-public abstract class RequestAwareRunnable implements Runnable {
+/**
+ * Runnable aware of HTTP session
+ */
+public abstract class SessionAwareRunnable implements Runnable {
 
     private final RequestAttributes requestAttributes;
     private Thread thread;
 
-    public RequestAwareRunnable() {
+    public SessionAwareRunnable() {
         this.requestAttributes = RequestContextHolder.getRequestAttributes();
         this.thread = Thread.currentThread();
     }

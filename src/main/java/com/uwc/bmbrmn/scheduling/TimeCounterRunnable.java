@@ -2,6 +2,9 @@ package com.uwc.bmbrmn.scheduling;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Runnable for counting in-game time
+ */
 public class TimeCounterRunnable implements Runnable {
 
     private AtomicInteger gameSecond;

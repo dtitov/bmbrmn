@@ -5,6 +5,9 @@ import com.uwc.bmbrmn.model.units.Player;
 
 import java.util.Collection;
 
+/**
+ * Runnable for resetting steps done by Player and Bots
+ */
 public class ResetPlayersStepsRunnable implements Runnable {
 
     private Player player;

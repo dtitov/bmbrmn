@@ -2,13 +2,16 @@ package com.uwc.bmbrmn.logic.bombimg;
 
 import com.uwc.bmbrmn.logic.arena.Arena;
 import com.uwc.bmbrmn.model.tiles.Cell;
-import com.uwc.bmbrmn.scheduling.RequestAwareRunnable;
+import com.uwc.bmbrmn.scheduling.SessionAwareRunnable;
 
 import java.util.concurrent.Future;
 
 import static com.uwc.bmbrmn.logic.bombimg.BombManager.DETONATION_DELAY;
 
-public class BombRunnable extends RequestAwareRunnable {
+/**
+ * Runnable to detonate bomb
+ */
+public class BombRunnable extends SessionAwareRunnable {
 
     private Arena arena;
     private BombManager bombManager;
@@ -25,6 +28,9 @@ public class BombRunnable extends RequestAwareRunnable {
         this.y = cell.getY();
     }
 
+    /**
+     * Detonates bomb after constant delay, switches off runnable after detonation
+     */
     @Override
     protected void onRun() {
         try {

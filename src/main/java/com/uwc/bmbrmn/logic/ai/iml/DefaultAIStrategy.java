@@ -46,17 +46,28 @@ public class DefaultAIStrategy implements AIStrategy {
 
     private AStarGridFinder<GridCell> finder;
 
+    /**
+     * Init AI
+     */
     @PostConstruct
     public void init() {
         initPathfinder();
     }
 
+    /**
+     * Init pathfinder
+     */
     private void initPathfinder() {
         GridFinderOptions options = new GridFinderOptions();
         options.allowDiagonal = false;
         finder = new AStarGridFinder<>(GridCell.class, options);
     }
 
+    /**
+     * Performs action with bot
+     * Should get total lock for map to avoid race condition with Player's thread (input)
+     * TODO: rework global locking because it causes lack of performance
+     */
     @Override
     public void performAction(Bot bot) {
         CompositeLock mapLock = arena.getMapLock();
@@ -71,6 +82,9 @@ public class DefaultAIStrategy implements AIStrategy {
         }
     }
 
+    /**
+     * @param bot Bot
+     */
     private void performActionInternally(Bot bot) {
         if (CollectionUtils.isEmpty(getPossibleDirections(bot))) {
             return;
@@ -83,6 +97,13 @@ public class DefaultAIStrategy implements AIStrategy {
         }
     }
 
+    /**
+     * Finds path using A* algorithm
+     *
+     * @param from Start point
+     * @param to   Destination point
+     * @return Path represented as ordered sequence of points
+     */
     private Collection<ImmutablePair<Integer, Integer>> findPath(Pair<Integer, Integer> from, Pair<Integer, Integer> to) {
         GridCell[][] gridCells = arena.toGridCellsArray();
         NavigationGrid<GridCell> navigationGrid = new NavigationGrid<>(gridCells, false);
@@ -93,6 +114,12 @@ public class DefaultAIStrategy implements AIStrategy {
         return path.stream().map(gridCell -> new ImmutablePair<>(gridCell.getX(), gridCell.getY())).collect(Collectors.toList());
     }
 
+    /**
+     * Makes one-cell step in one of four possible directions
+     *
+     * @param bot    Bot
+     * @param target Destination point
+     */
     private void stepTo(Bot bot, Pair<Integer, Integer> target) {
         Event event = null;
         if (target.getLeft() > bot.getX()) {
@@ -107,6 +134,12 @@ public class DefaultAIStrategy implements AIStrategy {
         eventProcessor.processEvent(event, bot);
     }
 
+    /**
+     * Calculates full path to destination point and performs first step
+     *
+     * @param bot    Bot
+     * @param target Destination point
+     */
     private void goTo(Bot bot, Pair<Integer, Integer> target) {
         Collection<ImmutablePair<Integer, Integer>> path = findPath(bot.toPair(), target);
         if (!CollectionUtils.isEmpty(path)) {
@@ -114,6 +147,12 @@ public class DefaultAIStrategy implements AIStrategy {
         }
     }
 
+    /**
+     * Gets all possible directions of for available: Up, Down, Left, Right
+     *
+     * @param bot Bot
+     * @return Possible directions represented by events
+     */
     private Collection<Event> getPossibleDirections(Bot bot) {
         Collection<Event> possibleDirections = new HashSet<>(4);
 
@@ -138,6 +177,11 @@ public class DefaultAIStrategy implements AIStrategy {
         return possibleDirections;
     }
 
+    /**
+     * Tries to find safe place and go there if it exists
+     *
+     * @param bot Bot
+     */
     private void goToSafety(Bot bot) {
         Pair<Integer, Integer> safePlace = findSafePlace(bot);
         if (safePlace != null) {
@@ -145,6 +189,12 @@ public class DefaultAIStrategy implements AIStrategy {
         }
     }
 
+    /**
+     * Tries to find safe place
+     *
+     * @param bot Bot
+     * @return One of closest safe point or null if there's no safe point to reach
+     */
     private Pair<Integer, Integer> findSafePlace(Bot bot) {
         for (int radius = 1; radius < Math.min(arena.getWidth(), arena.getHeight()) / 2; radius++) {
             for (int i = -radius; i <= radius; i++) {
@@ -164,19 +214,44 @@ public class DefaultAIStrategy implements AIStrategy {
         return null;
     }
 
+    /**
+     * Checks if destination point is reachable
+     *
+     * @param bot    Bot
+     * @param target Destination point
+     * @return true if destination point is reachable, false otherwise
+     */
     private boolean isReachable(Bot bot, Pair<Integer, Integer> target) {
         Collection<ImmutablePair<Integer, Integer>> path = findPath(bot.toPair(), target);
         return !CollectionUtils.isEmpty(path);
     }
 
+    /**
+     * Checks if point is safe
+     *
+     * @param cell Point to check
+     * @return true if point is safe, false otherwise
+     */
     private boolean isSafe(Pair<Integer, Integer> cell) {
         return CollectionUtils.isEmpty(getDangerousCells(cell));
     }
 
+    /**
+     * Checks if point is unsafe (might be detonated soon)
+     *
+     * @param cell Point to check
+     * @return true if point is unsafe, false otherwise
+     */
     private boolean isInDanger(Pair<Integer, Integer> cell) {
         return !isSafe(cell);
     }
 
+    /**
+     * Returns collection of dangerous (mined) points which will affect current point
+     *
+     * @param cell Point to check
+     * @return Collection of dangerous (mined) points which will affect current poin
+     */
     private Collection<Pair<Integer, Integer>> getDangerousCells(Pair<Integer, Integer> cell) {
         Collection<Pair<Integer, Integer>> dangerousCells = new HashSet<>(9);
         Cell currentCell = arena.getCellAt(cell.getLeft(), cell.getRight());
@@ -190,6 +265,14 @@ public class DefaultAIStrategy implements AIStrategy {
         return dangerousCells;
     }
 
+    /**
+     * Recursively fills collection of cells which are aoing to be burnt
+     *
+     * @param cellsToBurn Collection to fill
+     * @param center      Center point
+     * @param delta       Scanning length
+     * @param horizontal  Scanning direction
+     */
     private void collectCellsToBurn(Collection<Pair<Integer, Integer>> cellsToBurn, Pair<Integer, Integer> center, int delta, boolean horizontal) {
         if (Math.abs(delta) > Arena.BURNING_RADIUS + 1) {
             return;

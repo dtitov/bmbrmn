@@ -267,5 +267,11 @@ $.getJSON('/getArena', function (data) {
                 }
             }
         }, false);
+
+        source.addEventListener('error', function(e) {
+            if (e.readyState == EventSource.CLOSED) {
+                source.close();
+            }
+        }, false);
     }
 });

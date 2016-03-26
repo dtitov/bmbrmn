@@ -27,7 +27,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -79,12 +78,7 @@ public class DefaultAIStrategy implements AIStrategy {
 
         if (isInDanger(bot.toPair())) {
             goToSafety(bot);
-            return;
-        }
-
-        ThreadLocalRandom current = ThreadLocalRandom.current();
-        boolean plantBomb = current.nextBoolean();
-        if (plantBomb) {
+        } else {
             eventProcessor.processEvent(Event.PLANT_BOMB, bot);
         }
     }

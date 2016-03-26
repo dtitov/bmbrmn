@@ -53,7 +53,7 @@ public class ArenaTest {
 
     @Test
     public void getTimeInSeconds() throws Exception {
-        Assert.assertThat(arena.getTimeInSeconds(), is(greaterThan(BigInteger.ZERO.intValue())));
+        Assert.assertThat(arena.getTimeInSeconds(), is(greaterThanOrEqualTo(BigInteger.ZERO.intValue())));
     }
 
     @Test

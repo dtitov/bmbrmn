@@ -88,18 +88,27 @@ public class DefaultAIStrategy implements AIStrategy {
      * - If Bot is in danger - try to take him to safe place
      * - If Bot is not in danger - place bomb
      * <p>
-     * TODO: There should be check if planting bomb gonna kill the bot
-     * TODO: If so, the bomb shouldn't be planted and the bot should go to some other cell
+     * Overall AI strategy is purely defencive:
+     * - bots don't chase each other (or player)
+     * - bots just plant bombs and hide from bombs
+     * - with such behavior bot may stuck and start running in circles, but
+     * after a while when he acquires sufficient supply of bombs, he breaks the cycle and go further
      *
      * @param bot Bot
      */
     private void performActionInternally(Bot bot) {
-        if (CollectionUtils.isEmpty(getPossibleDirections(bot))) {
+        Collection<Event> possibleDirections = getPossibleDirections(bot);
+        if (CollectionUtils.isEmpty(possibleDirections)) {
             return;
         }
 
         if (isInDanger(bot.toPair())) {
             goToSafety(bot);
+            return;
+        }
+
+        if (arena.isCornerCell(bot.getX(), bot.getY())) {
+            eventProcessor.processEvent(possibleDirections.iterator().next(), bot);
         } else {
             eventProcessor.processEvent(Event.PLANT_BOMB, bot);
         }

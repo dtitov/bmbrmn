@@ -2,7 +2,6 @@ package com.uwc.bmbrmn.logic.ai.iml;
 
 import com.uwc.bmbrmn.logic.ai.AIStrategy;
 import com.uwc.bmbrmn.model.units.Bot;
-import com.uwc.bmbrmn.model.units.Player;
 import com.uwc.bmbrmn.scheduling.RequestAwareRunnable;
 
 import java.util.Collection;
@@ -19,9 +18,7 @@ public class BotActionRunnable extends RequestAwareRunnable {
 
     @Override
     protected void onRun() {
-        bots.stream().filter(Player::isAlive).forEach(bot -> {
-            aiStrategy.performAction(bot);
-        });
+        bots.stream().filter(Bot::isAlive).forEach(bot -> aiStrategy.performAction(bot));
     }
 
 }

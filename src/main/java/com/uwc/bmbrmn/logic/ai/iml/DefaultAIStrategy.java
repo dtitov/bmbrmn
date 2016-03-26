@@ -9,6 +9,8 @@ import com.uwc.bmbrmn.model.tiles.Cell;
 import com.uwc.bmbrmn.model.units.Bot;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -34,6 +36,8 @@ import static com.uwc.bmbrmn.logic.arena.Arena.LOCK_TIMEOUT;
 @Service
 @Scope(scopeName = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class DefaultAIStrategy implements AIStrategy {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultAIStrategy.class);
 
     @Autowired
     private Arena arena;
@@ -62,7 +66,7 @@ public class DefaultAIStrategy implements AIStrategy {
                 performActionInternally(bot);
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
         } finally {
             mapLock.unlock();
         }

@@ -9,6 +9,8 @@ import com.uwc.bmbrmn.logic.arena.Arena;
 import com.uwc.bmbrmn.model.tiles.Cell;
 import com.uwc.bmbrmn.model.units.Bot;
 import com.uwc.bmbrmn.model.units.Player;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,7 +25,9 @@ import java.util.Collection;
 @RequestMapping("/")
 public class GameController {
 
-    public static final String GAME_OVER = "GAME_OVER";
+    private static final Logger LOGGER = LoggerFactory.getLogger(GameController.class);
+
+    private static final String GAME_OVER = "GAME_OVER";
 
     @Autowired
     private Arena arena;
@@ -57,7 +61,7 @@ public class GameController {
             }
             status = mapper.writeValueAsString(slice);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
         }
         return "retry: 100\ndata: " + status + "\n\n";
     }

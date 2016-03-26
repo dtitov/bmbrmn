@@ -16,6 +16,8 @@ import com.uwc.bmbrmn.model.units.Bot;
 import com.uwc.bmbrmn.model.units.Player;
 import com.uwc.bmbrmn.scheduling.ResetPlayersStepsRunnable;
 import com.uwc.bmbrmn.scheduling.TimeCounterRunnable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
@@ -36,6 +38,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Component
 @Scope(scopeName = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class DefaultArena implements Arena {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultArena.class);
 
     @Autowired
     private ChangesTracker<Cell> changesTracker;
@@ -188,7 +192,7 @@ public class DefaultArena implements Arena {
                 changesTracker.track(anotherCell);
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
         } finally {
             compositeLock.unlock();
         }
@@ -203,7 +207,7 @@ public class DefaultArena implements Arena {
                 }
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
         } finally {
             player.getLock().unlock();
         }
@@ -218,7 +222,7 @@ public class DefaultArena implements Arena {
                 cellsToBurn.forEach(this::burnCell);
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
         } finally {
             compositeLock.unlock();
         }

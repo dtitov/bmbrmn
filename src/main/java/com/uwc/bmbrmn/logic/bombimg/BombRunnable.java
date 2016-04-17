@@ -3,6 +3,8 @@ package com.uwc.bmbrmn.logic.bombimg;
 import com.uwc.bmbrmn.logic.arena.Arena;
 import com.uwc.bmbrmn.model.tiles.Cell;
 import com.uwc.bmbrmn.scheduling.SessionAwareRunnable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.Future;
 
@@ -12,6 +14,8 @@ import static com.uwc.bmbrmn.logic.bombimg.BombManager.DETONATION_DELAY;
  * Runnable to detonate bomb
  */
 public class BombRunnable extends SessionAwareRunnable {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BombRunnable.class);
 
     private Arena arena;
     private BombManager bombManager;
@@ -41,7 +45,7 @@ public class BombRunnable extends SessionAwareRunnable {
                 future.cancel(false);
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
         }
     }
 

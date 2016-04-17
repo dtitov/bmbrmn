@@ -199,7 +199,7 @@ public class DefaultArena implements Arena {
     }
 
     /**
-     * Swap to cells
+     * Swap two cells
      *
      * @param item         First cell to swap
      * @param anotherCell  Second cell to swap
